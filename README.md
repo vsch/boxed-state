@@ -227,7 +227,7 @@ boxed.appState_$.dashboards_$.userData_$(_$ => {
 
 ```
 
-:warning: When a property is set through the parent collection it orphans the boxed state for
+:warning: When a value is set on the parent collection it orphans the boxed state for
 all the properties of the parent for which you kept reference. These detached properties will
 still work but only on their own copy of the data since they are now detached from the root.
 
