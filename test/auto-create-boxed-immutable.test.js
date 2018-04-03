@@ -1,6 +1,6 @@
 "use strict";
 
-let boxed = require("boxed-js");
+let boxed = require("boxed-immutable");
 let _$ = boxed._$;
 let createBox = boxed.createBox;
 let Boxed = boxed.Boxed;

@@ -1,4 +1,4 @@
-# boxed-js
+# boxed-immutable
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
@@ -11,14 +11,14 @@ object property access.
 Use [npm](https://npmjs.com/) to install.
 
 ```sh
-npm install boxed-js --save
+npm install boxed-immutable --save
 ```
 
 ## Usage
 
-[![NPM](https://nodei.co/npm/boxed-js.png)](https://www.npmjs.com/package/boxed-js)
+[![NPM](https://nodei.co/npm/boxed-immutable.png)](https://www.npmjs.com/package/boxed-immutable)
 
-Create a boxed-js object proxy then access and/or modify its nested properties, ignoring whether
+Create a boxed-immutable object proxy then access and/or modify its nested properties, ignoring whether
 intermediate values are objects/arrays or whether they exist.
 
 Original object/array are shallow copied on first modification (all the way back to the root
@@ -41,7 +41,7 @@ Use option 1 to access leaf values in the object since JavaScript handles this n
 Use option 2 to access intermediate properties.
 
 ```javascript
-const _$ = require('boxed-js')._$;
+const _$ = require('boxed-immutable')._$;
 
 function updateState(confirmationName, confirmationValue) {
     let state = _$(this.getState());
@@ -155,7 +155,7 @@ Use the `createBox(options)` function from the module to create a boxing functio
 non-default options:
 
 ```javascript
-const createBox = require('boxed-js').createBox;
+const createBox = require('boxed-immutable').createBox;
 const $__$ = createBox({prefixChars: "$_", suffixChars:"_$"});
 
 // Now all your properties are wrapped 
@@ -255,5 +255,5 @@ nested[_$] = 5;
 
 ## License
 
-MIT, see [LICENSE.md](http://github.com/vsch/boxed-js/blob/master/LICENSE.md) for details.
+MIT, see [LICENSE.md](http://github.com/vsch/boxed-immutable/blob/master/LICENSE.md) for details.
 

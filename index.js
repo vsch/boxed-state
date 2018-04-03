@@ -1,6 +1,6 @@
 'use strict';
 
-const boxed = require('./lib/boxed-js');
+const boxed = require('./lib/boxed-immutable');
 
 exports._$ = boxed.box;
 exports.createBox = boxed.createBox;
