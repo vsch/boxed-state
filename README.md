@@ -94,8 +94,8 @@ let empty = _$();
 
 // all are equivalent
 empty["_$"] = 5;
-empty[_$] = 5;
-empty._$ = 5;  // if you know its empty can also do empty[0] however if you are wrong then the latter will overwrite the value at 0
+empty[_$] = 5;  // may not work, depends on how functions is converted to string
+empty._$ = 5;  // simplest and safest alternative
 // result: [5]
 
 empty._$ = 10;
@@ -139,10 +139,11 @@ let result = obj.unboxed$_$;
 // result: {0: 5, 1:15, 2:25, prop: "a"}
 
 // the same can be achieved with, without having to increment the index
+let obj = _$({});
 obj.prop = "a";
-obj[_$] = 5;
-obj[_$] = 15;
-obj[_$] = 25;
+obj._$ = 5;
+obj._$ = 15;
+obj._$ = 25;
 ```
 
 ### Options
@@ -161,9 +162,9 @@ const $__$ = createBox({prefixChars: "$_", suffixChars:"_$"});
 let obj = $__$();
 
 obj.$_field_$.subField = 4;
-obj.$_prop_$[$__$] = "a";
-obj.$_prop_$[$__$] = "b";
-obj.$_prop_$[$__$] = "c";
+obj.$_prop_$.$__$ = "a";
+obj.$_prop_$.$__$ = "b";
+obj.$_prop_$.$__$ = "c";
 
 let result = obj.$_unboxed$_$;
 // result: { field: { subField: 4 }, prop: [ "a", "b", "c"] };
@@ -192,6 +193,8 @@ box context
 
 ## API
 
+### boxed-immutable box
+
 Change `_$` to your combination of prefix/suffix if modifying defaults.
 
 With default settings all magic properties except `_$` get an extra `$` added because of the
@@ -205,6 +208,7 @@ Magic Properties of boxed properties:
 | `forEach$_$`   | function                                                                                  | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach$_$((boxedValue, prop, unboxedValue) =>{});` |
 | `unboxed$_$`   | unboxed value                                                                             | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                            |
 | `modified$_$`  | value if modified else undefined                                                          | same as above                                                                           | same as above             | error                                                                                                            |
+| `default$_$`   | function                                                                                  | set value if it is undefined, otherwise do nothing                                      | error                     | error                                                                                                            |
 | `delta$_$`     | modified properties of first level, full props thereafter: shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                            |
 | `deepDelta$_$` | modified properties only of all levels: deep delta                                        | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                            |
 
@@ -227,9 +231,9 @@ boxed.appState_$.dashboards_$.userData_$(_$ => {
 
 ```
 
-:warning: When a value is set on the parent collection it orphans the boxed state for
-all the properties of the parent for which you kept reference. These detached properties will
-still work but only on their own copy of the data since they are now detached from the root.
+:warning: When a value is set on the parent collection it orphans the boxed state for all the
+properties of the parent for which you kept reference. These detached properties will still work
+but only on their own copy of the data since they are now detached from the root.
 
 For example this will happen when you do something like:
 
@@ -237,19 +241,105 @@ For example this will happen when you do something like:
 let boxed = _$();
 
 let nested = boxed.level1_$.level2_$.level3_$;
-nested[_$] = 0;
-nested[_$] = 1;
-nested[_$] = 2;
+nested._$ = 0;
+nested._$ = 1;
+nested._$ = 2;
 // boxed is now: { level1: { level2: { level3: [0,1,2]}}};
 
 boxed.level1_$.level2_$.level3 = [0,1,2]; // this will detach all boxed properties from level3 and below, like nested  
 
-nested[_$] = 3;
-nested[_$] = 4;
-nested[_$] = 5;
+nested._$ = 3;
+nested._$ = 4;
+nested._$ = 5;
 // nested is [0,1,2,3,4,5]
 // boxed is still: { level1: { level2: { level3: [0,1,2]}}};
 ```
+
+### boxed-immutable boxedOnDemand
+
+Provides a boxed proxy to immutable state, with `.save()` and `.cancel()` methods for saving or
+canceling state changes. With minimal code this allows transparent access to current state
+without the callers worrying about stale data or how to apply the changes back to the state
+holder.
+
+```javascript
+const boxedOnDemand = require('boxed-immutable').boxedOnDemand;
+
+// your current function for returning immutable state object
+function getSimpleState() {
+}
+
+let stateHolder;
+
+// your current function for setting a new state 
+function saveState(newState) {
+    // 1. update state
+
+    // 2. regardless of how this function is called, cancel the boxed on demand so next access will be forced to get a fresh state
+    stateHolder.cancel();
+}
+
+// wrap in proxy so boxed state can be provided automatically
+// use in new getState to get boxed on demand
+stateHolder = boxedOnDemand(undefined, () => {
+    return getSimpleState();
+}, (modified, boxed) => {
+    // call the save state function to apply changes in full
+    saveState(modified);
+
+    // or if your saveState can handle delta
+    //saveState(boxed.delta$_$);
+    // or anything else without having to change the users of your state API
+});
+
+// use new function to provide access to now boxed immutable state
+function getState() {
+    return stateHolder;
+}
+
+// somewhere in the code.
+let state = getState();
+
+// can use state as before or as boxed state, except now there is no need to get a new state 
+// every time. The same state will reflect latest changes. Make a copy if you need immutable state
+
+// NOTE: now it is not immutable, make a copy of its .unboxed$_$ property if you need an immutable copy  
+
+
+// make changes
+// saving is handled by the provider instead of having the caller know how to update state
+state.save(); // save changes
+state.cancel(); // discard changes
+
+// next access to any properties of the boxed state will get a fresh copy to eliminate invalid state content after update/cancel
+```
+
+| Property | Get      | Set   | Delete | Call                                                                                                                                                                 |
+|:---------|:---------|:------|:-------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `save`   | function | error | error  | calls the saveState callback passed to boxedOnDemand function, returns value returned from callback, callback only called if there were changes made to boxed object |
+| `cancel` | function | error | error  | cancels any changes and destroys the boxed object, it is recreated on next access with a fresh copy of the immutable state                                           |
+
+#### boxedOnDemand(getState, saveState, options)
+
+```javascript
+const boxedOnDemand = require('boxed-immutable').boxedOnDemand;
+const onDemandState = boxedOnDemand();
+```
+
+Used to construct a new boxed on demand proxy.
+
+| argument    | default | Description                                                                                                                              |
+|:------------|:--------|:-----------------------------------------------------------------------------------------------------------------------------------------|
+| `getState`  | none    | callback to call to obtain the current state                                                                                             |
+| `saveState` | none    | callback to call on save operation, returned result passed back to caller of `save()`.                                                   |
+| `options`   | box     | options to use. Can be a box as provided by boxedImmutable.box or boxedImmutable.createBox(), then all other options are set to defaults |
+
+| Option             | Default    | Description                                                                                                                                      |
+|:-------------------|:-----------|:-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `box`:             | global box | Which box creation to use for each new boxed state object                                                                                        |
+| `saveBoxedProp`:   | 'save'     | name of the `save` property to use, allows changing of the function to 'commit' or something that will not conflict with your state's properties |
+| `cancelBoxedProp`: | 'cancel'   | name of the `cancel` property to use, allows changing of the function to something that will not conflict with your state's properties           |
+| `wrapProps`:       | false      | if true will wrap the saveBoxedProp and cancelBoxedProp the same as magical properties of the boxed object created from the box                  |
 
 ## License
 

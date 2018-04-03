@@ -3,11 +3,21 @@
 
 [TOC]: # " "
 
+- [0.1.4](#014)
 - [0.1.3](#013)
 - [0.1.2](#012)
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## 0.1.4
+
+* Fix: deep delta would not include properties for which proxy was created after the property
+  was already modified in the parent.
+* Add: `default$_$` magic property which only changes value if it is `undefined`, otherwise a
+  noop. Use: `boxed.field_$.default$_$ = value;` or `boxed.field_$.default$_$(value)`
+* Add: `boxedOnDemand` proxy wrapper to allow creating a boxed state with `save()` and
+  `cancel()` methods. It provides a new copy of the state if it has changed from last access.
 
 ## 0.1.3
 
