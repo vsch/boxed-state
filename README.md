@@ -18,8 +18,8 @@ npm install boxed-immutable --save
 
 [![NPM](https://nodei.co/npm/boxed-immutable.png)](https://www.npmjs.com/package/boxed-immutable)
 
-Create a boxed-immutable object proxy then access and/or modify its nested properties, ignoring whether
-intermediate values are objects/arrays or whether they exist.
+Create a boxed-immutable object proxy then access and/or modify its nested properties, ignoring
+whether intermediate values are objects/arrays or whether they exist.
 
 Original object/array are shallow copied on first modification (all the way back to the root
 collection), thereafter all mods are done on the copy. This occurs at every level so minimal
@@ -67,13 +67,13 @@ Use it to safely access deeply nested values without throwing `TypeError`:
 let boxed = _$(someValue);
 
 // anything accessed via proxied properties (ending in _$) could be undefined, null, or anything that would throw a TypeError, the result is undefined
-let caption = boxed.appState_$.dashboard[dashboardName + "_$"].captionText || 'default caption';
+let caption = boxed.appState_$.dashboard_$[dashboardName + "_$"].captionText || 'default caption';
 
 // would work just as well
 let boxed = _$(undefined);
 
 // everything could be completely empty, the end result is undefined
-let caption = boxed.appState_$.dashboard[dashboardName + "_$"].captionText || 'default caption';
+let caption = boxed.appState_$.dashboard_$[dashboardName + "_$"].captionText || 'default caption';
 
 ```
 
@@ -113,7 +113,7 @@ let empty = _$();
 
 // all are equivalent
 empty["field"] = 5;
-empty.field = 5;  // if you know its empty can also do empty[0] however if you are wrong then the latter will overwrite the value at 0
+empty.field = 5; 
 // result: {field: 5}
 
 empty._$ = 10;
@@ -123,7 +123,6 @@ empty._$ = 20;
 let result = empty.unboxed$_$;
 // result: [5, 10, 20]
 ```
-
 
 For symmetry, you can also use `_$` on objects. In case of objects `_$` is equal to the greatest
 integer key in the object or 0 if no integer keys. Here is why:
@@ -170,7 +169,6 @@ let result = obj.$_unboxed$_$;
 // result: { field: { subField: 4 }, prop: [ "a", "b", "c"] };
 ```
 
-
 | Option                             | Default     | Description                                                                              |
 |:-----------------------------------|:------------|:-----------------------------------------------------------------------------------------|
 | `deleteEmptyCollections:`          | `true`      | if deleting a property results in an empty collection, delete that too                   |
@@ -196,19 +194,19 @@ box context
 
 Change `_$` to your combination of prefix/suffix if modifying defaults.
 
-With default settings all magic properties except `_$` get an extra `$` added because of the default `magicSuffixChars` being `"$"`
+With default settings all magic properties except `_$` get an extra `$` added because of the
+default `magicSuffixChars` being `"$"`
 
 Magic Properties of boxed properties:
 
-| Property       | Get                                                                                     | Set                                                                                     | Delete                    | Call                                                                                                            |
-|:---------------|:----------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:--------------------------|:----------------------------------------------------------------------------------------------------------------|
-| `_$`           | proxy of the boxed object, ie.  boxed === boxed._$, so you can do boxed._$() or boxed() | append end of array                                                                     | error                     | does a call or first use as `boxed._$(_$ => { });` returns `boxed`                                              |
-| `forEach$_$`   | function                                                                                | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach_$((boxedValue, prop, unboxedValue) =>{});` |
-| `unboxed$_$`   | unboxed value                                                                           | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                           |
-| `modified$_$`  | value if modified else undefined                                                        | same as above                                                                           | same as above             | error                                                                                                           |
-| `delta$_$`     | modified properties of first leve, all props thereafter, shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                           |
-| `deepDelta$_$` | modified properties of all levels, deep delta                                           | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                           |
-
+| Property       | Get                                                                                       | Set                                                                                     | Delete                    | Call                                                                                                            |
+|:---------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:--------------------------|:----------------------------------------------------------------------------------------------------------------|
+| `_$`           | proxy of the boxed object, ie.  boxed === boxed.\_$, so you can do boxed.\_$() or boxed() | append end of array                                                                     | error                     | does a call or first use as `boxed._$(_$ => { });` returns `boxed`                                              |
+| `forEach$_$`   | function                                                                                  | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach_$((boxedValue, prop, unboxedValue) =>{});` |
+| `unboxed$_$`   | unboxed value                                                                             | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                           |
+| `modified$_$`  | value if modified else undefined                                                          | same as above                                                                           | same as above             | error                                                                                                           |
+| `delta$_$`     | modified properties of first level, full props thereafter: shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                           |
+| `deepDelta$_$` | modified properties only of all levels: deep delta                                        | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                           |
 
 Use of `._$()`, sometimes you need to modify deep properties based on programming logic. Instead
 of creating an object then adding it to your modified state, you can use this option and benefit
@@ -230,8 +228,8 @@ boxed.appState_$.dashboards_$.userData_$(_$ => {
 ```
 
 :warning: When a property is set through the parent collection it orphans the boxed state for
-all the properties that the parent for which you kept reference. These detached properties will
-still work but only on their own copy of the data since they are now the detached from the root.
+all the properties of the parent for which you kept reference. These detached properties will
+still work but only on their own copy of the data since they are now detached from the root.
 
 For example this will happen when you do something like:
 
@@ -244,7 +242,7 @@ nested[_$] = 1;
 nested[_$] = 2;
 // boxed is now: { level1: { level2: { level3: [0,1,2]}}};
 
-boxed.level1_$.level2_$.level3 = [0,1,2];
+boxed.level1_$.level2_$.level3 = [0,1,2]; // this will detach all boxed properties from level3 and below, like nested  
 
 nested[_$] = 3;
 nested[_$] = 4;
@@ -255,5 +253,6 @@ nested[_$] = 5;
 
 ## License
 
-MIT, see [LICENSE.md](http://github.com/vsch/boxed-immutable/blob/master/LICENSE.md) for details.
+MIT, see [LICENSE.md](http://github.com/vsch/boxed-immutable/blob/master/LICENSE.md) for
+details.
 
