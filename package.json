@@ -1,0 +1,34 @@
+{
+  "name": "boxed-js",
+  "version": "0.1.0",
+  "description": "Immutable proxy wrapper with auto-vivification",
+  "main": "index.js",
+  "license": "MIT",
+  "author": {
+    "name": "Vladimir Schneider",
+    "email": "vladimir.schneider@gmail.com",
+    "url": "https://github.com/vsch"
+  },
+  "dependencies": {
+    "lodash": "^4.17.5"
+  },
+  "devDependencies": {
+    "jest": "^22.4.3"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "immutable",
+    "min-object-delta",
+    "auto-vivification"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vsch/boxed-js.git"
+  },
+  "homepage": "https://github.com/vsch/boxed-js",
+  "bugs": {
+    "url": "https://github.com/vsch/boxed-js/issues"
+  }
+}
