@@ -117,11 +117,11 @@ empty.field = 5;
 // result: {field: 5}
 
 empty._$ = 10;
-// result: [5, 10]
+// result: {0: 10, field: 5}
 
 empty._$ = 20;
 let result = empty.unboxed$_$;
-// result: [5, 10, 20]
+// result: {0: 10, 1: 20, field: 5}
 ```
 
 For symmetry, you can also use `_$` on objects. In case of objects `_$` is equal to the greatest
@@ -138,7 +138,7 @@ obj[2] = 25;
 let result = obj.unboxed$_$;
 // result: {0: 5, 1:15, 2:25, prop: "a"}
 
-// the same can be achieved with
+// the same can be achieved with, without having to increment the index
 obj.prop = "a";
 obj[_$] = 5;
 obj[_$] = 15;
@@ -199,14 +199,14 @@ default `magicSuffixChars` being `"$"`
 
 Magic Properties of boxed properties:
 
-| Property       | Get                                                                                       | Set                                                                                     | Delete                    | Call                                                                                                            |
-|:---------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:--------------------------|:----------------------------------------------------------------------------------------------------------------|
-| `_$`           | proxy of the boxed object, ie.  boxed === boxed.\_$, so you can do boxed.\_$() or boxed() | append end of array                                                                     | error                     | does a call or first use as `boxed._$(_$ => { });` returns `boxed`                                              |
-| `forEach$_$`   | function                                                                                  | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach_$((boxedValue, prop, unboxedValue) =>{});` |
-| `unboxed$_$`   | unboxed value                                                                             | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                           |
-| `modified$_$`  | value if modified else undefined                                                          | same as above                                                                           | same as above             | error                                                                                                           |
-| `delta$_$`     | modified properties of first level, full props thereafter: shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                           |
-| `deepDelta$_$` | modified properties only of all levels: deep delta                                        | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                           |
+| Property       | Get                                                                                       | Set                                                                                     | Delete                    | Call                                                                                                             |
+|:---------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:--------------------------|:-----------------------------------------------------------------------------------------------------------------|
+| `_$`           | proxy of the boxed object, ie.  boxed === boxed.\_$, so you can do boxed.\_$() or boxed() | append end of array                                                                     | error                     | does a call or first use as `boxed._$(_$ => { });` returns `boxed`                                               |
+| `forEach$_$`   | function                                                                                  | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach$_$((boxedValue, prop, unboxedValue) =>{});` |
+| `unboxed$_$`   | unboxed value                                                                             | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                            |
+| `modified$_$`  | value if modified else undefined                                                          | same as above                                                                           | same as above             | error                                                                                                            |
+| `delta$_$`     | modified properties of first level, full props thereafter: shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                            |
+| `deepDelta$_$` | modified properties only of all levels: deep delta                                        | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                            |
 
 Use of `._$()`, sometimes you need to modify deep properties based on programming logic. Instead
 of creating an object then adding it to your modified state, you can use this option and benefit
