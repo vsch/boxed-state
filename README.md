@@ -202,15 +202,16 @@ default `magicSuffixChars` being `"$"`
 
 Magic Properties of boxed properties:
 
-| Property       | Get                                                                                       | Set                                                                                     | Delete                    | Call                                                                                                             |
-|:---------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:--------------------------|:-----------------------------------------------------------------------------------------------------------------|
-| `_$`           | proxy of the boxed object, ie.  boxed === boxed.\_$, so you can do boxed.\_$() or boxed() | append end of array                                                                     | error                     | does a call on first argument, use: `boxed._$(_$ => { });` returns `boxed`                                       |
-| `forEach$_$`   | function                                                                                  | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach$_$((boxedValue, prop, unboxedValue) =>{});` |
-| `unboxed$_$`   | unboxed value                                                                             | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                            |
-| `modified$_$`  | value if modified else undefined                                                          | same as above                                                                           | same as above             | error                                                                                                            |
-| `default$_$`   | function                                                                                  | set value if it is undefined, otherwise do nothing                                      | error                     | error                                                                                                            |
-| `delta$_$`     | modified properties of first level, full props thereafter: shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                            |
-| `deepDelta$_$` | modified properties only of all levels: deep delta                                        | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                            |
+| Property       | Get                                                                                       | Set                                                                                     | Delete                    | Call                                                                                                                                             |
+|:---------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:--------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `_$`           | proxy of the boxed object, ie.  boxed === boxed.\_$, so you can do boxed.\_$() or boxed() | append end of array                                                                     | error                     | does a call on first argument, use: `boxed._$(_$ => { });` returns `boxed`                                                                       |
+| `get$_$`       | function                                                                                  | error                                                                                   | error                     | `.get$_$("prop")` is same as  `["prop" + "_$"]`, convenience function when you have a property name in a variabel and need a boxed version of it |
+| `forEach$_$`   | function                                                                                  | error                                                                                   | error                     | functions executes callback for each own property, passes  `.forEach$_$((boxedValue, prop, unboxedValue) =>{});`                                 |
+| `unboxed$_$`   | unboxed value                                                                             | set value of boxed property and mark as modified                                        | delete property in parent | error                                                                                                                                            |
+| `modified$_$`  | value if modified else undefined                                                          | same as above                                                                           | same as above             | error                                                                                                                                            |
+| `default$_$`   | function                                                                                  | set value if it is undefined, otherwise do nothing                                      | error                     | error                                                                                                                                            |
+| `delta$_$`     | modified properties of first level, full props thereafter: shallow delta                  | do shallow delta update of properties, all properties after first level will be changed | error                     | error                                                                                                                                            |
+| `deepDelta$_$` | modified properties only of all levels: deep delta                                        | do deep delta update with value, only modified properties of all levels are changed.    | error                     | error                                                                                                                                            |
 
 Use of `._$()`, sometimes you need to modify deep properties based on programming logic. Instead
 of creating an object then adding it to your modified state, you can use this option and benefit
@@ -255,7 +256,7 @@ nested._$ = 5;
 // boxed is still: { level1: { level2: { level3: [0,1,2]}}};
 ```
 
-### boxed-immutable boxedOnDemand
+### boxed-immutable boxOnDemand
 
 Provides a boxed proxy to immutable state, with `.save()` and `.cancel()` methods for saving or
 canceling state changes. With minimal code this allows transparent access to current state
@@ -263,7 +264,7 @@ without the callers worrying about stale data or how to apply the changes back t
 holder.
 
 ```javascript
-const boxedOnDemand = require('boxed-immutable').boxedOnDemand;
+const boxOnDemand = require('boxed-immutable').boxOnDemand;
 
 // your current function for returning immutable state object
 function getSimpleState() {
@@ -281,7 +282,7 @@ function saveState(newState) {
 
 // wrap in proxy so boxed state can be provided automatically
 // use in new getState to get boxed on demand
-stateHolder = boxedOnDemand(undefined, () => {
+stateHolder = boxOnDemand(undefined, () => {
     return getSimpleState();
 }, (modified, boxed) => {
     // call the save state function to apply changes in full
@@ -316,14 +317,14 @@ state.cancel(); // discard changes
 
 | Property | Get      | Set   | Delete | Call                                                                                                                                                                 |
 |:---------|:---------|:------|:-------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `save`   | function | error | error  | calls the saveState callback passed to boxedOnDemand function, returns value returned from callback, callback only called if there were changes made to boxed object |
-| `cancel` | function | error | error  | cancels any changes and destroys the boxed object, it is recreated on next access with a fresh copy of the immutable state                                           |
+| `save`   | function | error | error  | calls the saveState callback passed to boxOnDemand function, returns value returned from callback, callback only called if there were changes made to boxed object |
+| `cancel` | function | error | error  | cancels any changes and destroys the boxed object, it is recreated on next access with a fresh copy of the immutable state, returns proxy this for chaining calls    |
 
-#### boxedOnDemand(getState, saveState, options)
+#### boxOnDemand(getState, saveState, options)
 
 ```javascript
-const boxedOnDemand = require('boxed-immutable').boxedOnDemand;
-const onDemandState = boxedOnDemand();
+const boxOnDemand = require('boxed-immutable').boxOnDemand;
+const onDemandState = boxOnDemand();
 ```
 
 Used to construct a new boxed on demand proxy.

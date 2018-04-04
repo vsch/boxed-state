@@ -10,15 +10,13 @@
     "email": "vladimir@vladsch.com",
     "url": "https://github.com/vsch"
   },
+  "bundleDependencies": [],
   "dependencies": {
-    "lodash": "^4.17.5"
+    "lodash.isfunction": "^3.0.9",
+    "lodash.isstring": "^4.0.1"
   },
-  "devDependencies": {
-    "jest": "^22.4.3"
-  },
-  "scripts": {
-    "test": "jest"
-  },
+  "devDependencies": {},
+  "scripts": {},
   "keywords": [
     "immutable",
     "min-object-delta",

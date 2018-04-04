@@ -16,7 +16,7 @@
   was already modified in the parent.
 * Add: `default$_$` magic property which only changes value if it is `undefined`, otherwise a
   noop. Use: `boxed.field_$.default$_$ = value;` or `boxed.field_$.default$_$(value)`
-* Add: `boxedOnDemand` proxy wrapper to allow creating a boxed state with `save()` and
+* Add: `boxOnDemand` proxy wrapper to allow creating a boxed state with `save()` and
   `cancel()` methods. It provides a new copy of the state if it has changed from last access.
 
 ## 0.1.3

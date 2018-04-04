@@ -1,10 +1,10 @@
 "use strict";
 
-let boxed = require("boxed-immutable");
-let _$ = boxed._$;
-let createBox = boxed.createBox;
-let Boxed = boxed.Boxed;
-let BOXED_GET_THIS = boxed.BOXED_GET_THIS;
+const boxedImmutable = require("boxed-immutable");
+const _$ = boxedImmutable._$;
+const createBox = boxedImmutable.createBox;
+const Boxed = boxedImmutable.boxed.Boxed;
+const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
 
 function createBoxed(val) {
     const boxedProxy = _$(val);
@@ -308,5 +308,40 @@ describe('Default Value setting', () => {
     test('deepDelta$_$ == deepDelta', () => {
         expect(boxedProxy.deepDelta$_$).toEqual(deepDeltaValue);
     });
+});
+
+describe('Get prop', () => {
+    let origVal;
+    let boxedVal;
+    let boxedProxy;
+    let expectedValue;
+    let deltaValue;
+    let deepDeltaValue;
+
+    beforeAll(() => {
+        let vals = createBoxed({field1: ""});
+        origVal = vals.origVal;
+        boxedVal = vals.boxedVal;
+        boxedProxy = vals.boxedProxy;
+
+        boxedProxy.field1_$.default$_$ = 1;
+        boxedProxy.field2_$.default$_$ = 2;
+        boxedProxy.field2_$.default$_$ = 3;
+        boxedProxy.field3_$.default$_$(1);
+        boxedProxy.field3_$.default$_$(2);
+        boxedProxy.field3_$.default$_$(3);
+
+        expectedValue = {field1: "", field2: 2, field3:1, };
+        deepDeltaValue = deltaValue = {field2: 2, field3:1, };
+    });
+
+    test('[prop].prop fails', () => {
+        expect(()=>{let t= boxedProxy[field10].flag}).toThrow(ReferenceError);
+    });
+
+    test('get$_$(prop).prop succeeds', () => {
+        expect(boxedProxy.get$_$("field10").flag).toBe(undefined);
+    });
+
 });
 

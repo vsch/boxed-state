@@ -1,13 +1,20 @@
 'use strict';
 
 const boxed = require('./lib/boxed-immutable');
-const boxedOnDemand = require('./lib/boxed-on-demand');
+const onDemand = require('./lib/boxed-on-demand');
+const util = require('./lib/util');
 
-exports._$ = boxed.box;
-exports.createBox = boxed.createBox;
-exports.boxedOnDemand = boxedOnDemand.boxedOnDemand;
+boxed.BoxedOnDemand = onDemand.BoxedOnDemand;
+boxed.boxOnDemand = onDemand.boxOnDemand;
 
-// mostly for testing
-exports.Boxed = boxed.Boxed;
-exports.BoxedOnDemand = boxedOnDemand.BoxedOnDemand;
-exports.BOXED_GET_THIS = boxed.BOXED_GET_THIS;
+module.exports = {
+    default: boxed.box,
+    _$: boxed.box,
+    box: boxed.box,
+    createBox: boxed.createBox,
+    boxOnDemand: boxed.boxOnDemand,
+
+    // mostly for testing
+    util: util,
+    boxed: boxed,
+};

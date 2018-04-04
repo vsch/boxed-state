@@ -1,10 +1,10 @@
 "use strict";
 
-let boxed = require("boxed-immutable");
-let _$ = boxed._$;
-let createBox = boxed.createBox;
-let Boxed = boxed.Boxed;
-let BOXED_GET_THIS = boxed.BOXED_GET_THIS;
+const boxedImmutable = require("boxed-immutable");
+const _$ = boxedImmutable._$;
+const createBox = boxedImmutable.createBox;
+const Boxed = boxedImmutable.boxed.Boxed;
+const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
 
 function createBoxed(val) {
     const boxedProxy = _$(val);

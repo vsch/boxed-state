@@ -1,15 +1,15 @@
 "use strict";
 
-let boxed = require("boxed-immutable");
-let _$ = boxed._$;
-let boxedOnDemand = boxed.boxedOnDemand;
-let createBox = boxed.createBox;
-let Boxed = boxed.Boxed;
-let BoxedOnDemand = boxedOnDemand.BoxedOnDemand;
-let BOXED_GET_THIS = boxed.BOXED_GET_THIS;
+const boxedImmutable = require("boxed-immutable");
+const _$ = boxedImmutable._$;
+const createBox = boxedImmutable.createBox;
+const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
+const boxOnDemand = boxedImmutable.boxOnDemand;
+const BoxedOnDemand = boxedImmutable.boxed.BoxedOnDemand;
+const Boxed = boxedImmutable.boxed.Boxed;
 
 function createBoxed(get, set) {
-    const boxedProxy = boxedOnDemand(get, set);
+    const boxedProxy = boxOnDemand(get, set);
     return {
         boxedProxy: boxedProxy,
     };
@@ -359,6 +359,14 @@ describe('Boxed On Demand Updates', () => {
         boxedProxy._$.simple = 0;
         boxedProxy.cancel();
         expect(origVal).toEqual({ state: {} });
+    });
+
+    test('chain cancel', () => {
+        boxedProxy._$.simple = 0;
+        let retVal = boxedProxy.cancel();
+        retVal._$.simple = 0;
+        retVal.save();
+        expect(origVal).toEqual({"deepDelta": {"simple": 0}, "delta": {"simple": 0}, "state": {"simple": 0}});
     });
 });
 
