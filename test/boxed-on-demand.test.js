@@ -368,5 +368,13 @@ describe('Boxed On Demand Updates', () => {
         retVal.save();
         expect(origVal).toEqual({"deepDelta": {"simple": 0}, "delta": {"simple": 0}, "state": {"simple": 0}});
     });
+
+    test('set value to null', () => {
+        boxedProxy._$.simple = null;
+        let retVal = boxedProxy.cancel();
+        retVal._$.simple = null;
+        retVal.save();
+        expect(origVal).toEqual({"deepDelta": {"simple": null}, "delta": {"simple": null}, "state": {"simple": null}});
+    });
 });
 
