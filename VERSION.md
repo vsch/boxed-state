@@ -3,6 +3,7 @@
 
 [TOC]: # " "
 
+- [0.2.2](#022)
 - [0.2.0](#020)
 - [0.1.6](#016)
 - [0.1.5](#015)
@@ -12,6 +13,12 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## 0.2.2                   
+
+* Fix: exception if `getOwnPropertyNames()` is called on boxed object with null or undefined
+  value. Also, boxed properties of string value will not report char indices for own properties
+  as is done by Object.keys for string argument.
 
 ## 0.2.0                   
 

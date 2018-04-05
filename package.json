@@ -1,6 +1,6 @@
 {
   "name": "boxed-immutable",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "private": false,
   "description": "Immutable proxy wrapper with auto-vivification",
   "main": "index.js",

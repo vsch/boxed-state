@@ -1,6 +1,8 @@
 "use strict";
+
 const each = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
+const util = boxedImmutable.util;
 const testUtil = require('./testUtil');
 
 const _$ = boxedImmutable._$;
@@ -9,6 +11,7 @@ const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
+const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
 
 describe('Boxing of simple values', () => {
     const template = {
@@ -62,6 +65,10 @@ describe('Boxing of simple values', () => {
                 let nestedParams = generateTestParams(template, (t) => {
                     t.genTitle = (suffix, valueSuffix) => `${thisTest.testDescription}[${t.valueText + (valueSuffix ? ' + ' + valueSuffix : '')}]${suffix || ''}`;
                     return `${t.valueText} param`;
+                });
+
+                test('Object.keys(proxy) === Object.keys(original)', () => {
+                    expect(Object.keys(boxedProxy)).toEqual(util.isObject(origVal) || util.isFunction(origVal) ? Object.keys(origVal) : []);
                 });
 
                 each(nestedParams)

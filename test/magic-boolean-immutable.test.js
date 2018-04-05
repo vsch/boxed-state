@@ -40,11 +40,11 @@ describe('.boolean$(value)', () => {
             test(`_$(${thisTest.valueText}).boolean$_$ === ${!!thisTest.value}`, () => {
                 expect(boxedProxy.boolean$_$).toBe(!!thisTest.value);
             });
-            test(`_$().boolean$ = ${thisTest.valueText} === ${!!thisTest.value}`, () => {
+            test(`_$().boolean$ = ${thisTest.valueText}; // === ${!!thisTest.value}`, () => {
                 boxedProxy.boolean$ = thisTest.value;
                 expect(boxedProxy.unboxed$).toBe(!!thisTest.value);
             });
-            test(`_$().boolean$_$ = ${thisTest.valueText} === ${!!thisTest.value}`, () => {
+            test(`_$().boolean$_$ = ${thisTest.valueText}; // === ${!!thisTest.value}`, () => {
                 boxedProxy.boolean$_$ = thisTest.value;
                 expect(boxedVal.value).toBe(!!thisTest.value);
             });
