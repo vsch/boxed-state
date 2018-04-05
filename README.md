@@ -97,8 +97,9 @@ the array. Effectively, `_$` is always equal to the length of the array.
 let empty = _$();
 
 // all are equivalent
+empty[""] = 5;
 empty["_$"] = 5;
-empty[_$] = 5;  // may not work, depends on how functions is converted to string
+empty[_$] = 5;  // depending on how function is converted to string this may accept any function, not just box.
 empty._$ = 5;  // simplest and safest alternative
 // result: [5]
 
@@ -128,8 +129,9 @@ let result = empty.unboxed$;
 // result: {0: 10, 1: 20, field: 5}
 ```
 
-For symmetry, you can also use `_$` on objects. In case of objects `_$` is equal to the greatest
-integer key in the object or 0 if no integer keys. Here is why:
+For symmetry, you can also use the end of array index `_$` on objects. In case of objects `_$`
+is equal to the greatest integer key in the object or 0 if no integer keys. The goal is to make
+boxed values allow setting properties like their unboxed JavaScript counterparts. 
 
 ```javascript
 
@@ -144,6 +146,7 @@ let result = obj.unboxed$;
 
 // the same can be achieved with, without having to increment the index
 let obj = _$({});
+
 obj.prop = "a";
 obj._$ = 5;
 obj._$ = 15;
@@ -153,7 +156,7 @@ obj._$ = 25;
 ### Options
 
 You can change a couple of options on how the boxing handles properties whose value is
-`undefined` and also modify the prefix/suffix used for accessing boxed properties:
+`undefined` and modify the prefix/suffix used for accessing boxed properties or magic properties:
 
 Use the `createBox(options)` function from the module to create a boxing function with
 non-default options:
@@ -162,7 +165,7 @@ non-default options:
 const createBox = require('boxed-immutable').createBox;
 const $__$ = createBox({prefixChars: "$_", suffixChars:"_$", magicPrefixChars: "", magicSuffixChars: "$$"});
 
-// Now all your properties are wrapped 
+// Now all your properties are wrapped and magic properties end with two $ 
 let obj = $__$();
 
 obj.$_field_$.subField = 4;
@@ -174,22 +177,22 @@ let result = obj.unboxed$$;
 // result: { field: { subField: 4 }, prop: [ "a", "b", "c"] };
 ```
 
-| Option                             | Default     | Description                                                                              |
-|:-----------------------------------|:------------|:-----------------------------------------------------------------------------------------|
-| `deleteEmptyCollections:`          | `true`      | if deleting a property results in an empty collection, delete that too                   |
-| `ignoreUndefinedProperties:`       | `true`      | when copying delta and deepDelta ignore properties with `undefined` value                |
-| `arrayDeltaObjects:`               | `false`     | return array delta as objects with index as key                                          |
-| `arrayDeltaObjectMarker:`          | `undefined` | field name to set when returning array delta as objects, `undefined` means don't set     |
-| `arrayDeltaObjectMarkerValue:`     | `undefined` | value for above                                                                          |
-| `arrayDeltaPartials:`              | `false`     | return array delta as partials, any unset indices will be `undefined`                    |
-| `arrayDeepDeltaObjects:`           | `false`     | return array deepDelta as objects with index as key                                      |
-| `arrayDeepDeltaObjectMarker:`      | `undefined` | field name to set when returning array deepDelta as objects, `undefined` means don't set |
-| `arrayDeepDeltaObjectMarkerValue:` | `undefined` | value for above                                                                          |
-| `arrayDeepDeltaPartials:`          | `false`     | return array deepDelta as partials, any unset indices will be `undefined`                |
-| `prefixChars:`<sup>\[1]</sup>      | `""`        | prefix for boxed properties.                                                             |
-| `suffixChars:`<sup>\[1]</sup>      | `"_$"`      | suffix for boxed properties.                                                             |
-| `magicPrefixChars:`<sup>\[1]</sup> | `""`        | prefix for magic properties, applied after prefixChars                                   |
-| `magicSuffixChars:`<sup>\[1]</sup> | `"$"`       | suffix for magic properties, applied before suffixChars                                  |
+| Option                             | Default     | Description                                                                                                                                  |
+|:-----------------------------------|:------------|:---------------------------------------------------------------------------------------------------------------------------------------------|
+| `deleteEmptyCollections`:           | `true`      | if deleting a property results in an empty collection, delete that too                                                                       |
+| `ignoreUndefinedProperties`:        | `true`      | when copying delta and deepDelta ignore properties with `undefined` value                                                                    |
+| `arrayDeltaObjects`:                | `false`     | return array delta as objects with index as key                                                                                              |
+| `arrayDeltaObjectMarker`:           | `undefined` | field name to set when returning array delta as objects, `undefined` means don't set                                                         |
+| `arrayDeltaObjectMarkerValue`:      | `undefined` | value for above                                                                                                                              |
+| `arrayDeltaPartials`:               | `false`     | return array delta as partials, any unset indices will be `undefined`                                                                        |
+| `arrayDeepDeltaObjects`:            | `false`     | return array deepDelta as objects with index as key                                                                                          |
+| `arrayDeepDeltaObjectMarker`:       | `undefined` | field name to set when returning array deepDelta as objects, `undefined` means don't set                                                     |
+| `arrayDeepDeltaObjectMarkerValue`:  | `undefined` | value for above                                                                                                                              |
+| `arrayDeepDeltaPartials`:           | `true`      | return array deepDelta as partials, any unset indices will be `undefined`, false will return array delta from index 0 to last modified index |
+| `prefixChars`: <sup>\[1]</sup>      | `""`        | prefix for boxed properties.                                                                                                                 |
+| `suffixChars`: <sup>\[1]</sup>      | `"_$"`      | suffix for boxed properties.                                                                                                                 |
+| `magicPrefixChars`: <sup>\[1]</sup> | `""`        | prefix for magic properties, applied after prefixChars                                                                                       |
+| `magicSuffixChars`: <sup>\[1]</sup> | `"$"`       | suffix for magic properties, applied before suffixChars                                                                                      |
 
 \* \[1]: Note use of `[_$]` is not affected by prefixes or suffixes since the function is passed
 as property, use of `["_$"]` and `._$` has to have the prefix/suffix used in the options for the

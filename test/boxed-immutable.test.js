@@ -759,7 +759,7 @@ describe('Boxed Non-Empty Array Append to End', () => {
     });
 
     test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual([10, 5]);
+        expect(boxedProxy.deepDelta$_$).toEqual([undefined, 5]);
     });
 });
 
@@ -868,7 +868,7 @@ describe('Boxed Non-Empty Array Overwrite/Append', () => {
     });
 
     test('deepDelta$_$ == delta$_$', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.unboxedDelta());
+        expect(boxedProxy.deepDelta$_$).toEqual([5, undefined, 15]);
     });
 });
 

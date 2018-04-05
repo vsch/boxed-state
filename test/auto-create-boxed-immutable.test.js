@@ -219,7 +219,7 @@ describe('delta and deepDelta of Array should return 0..lastModified index, othe
     });
 
     test('deepDelta$_$ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(deepDeltaValue);
+        expect(boxedProxy.deepDelta$_$).toEqual([undefined, undefined, 12, undefined, undefined, 15, undefined, 17]);
     });
 });
 

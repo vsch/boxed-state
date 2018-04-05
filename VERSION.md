@@ -37,6 +37,8 @@
   `undefined`, `null` and other stuff won't do. `_$().boolean$ = value` will convert `value` to
   boolean before setting. `boolean$` and `boolean$_$` are equivalent.
 
+* Change: `arrayDeepDeltaPartials` default to `true`
+
 ## 0.1.6                    
 
 * Fix: setting null values would cause NPE.
