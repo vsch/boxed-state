@@ -99,8 +99,8 @@ let empty = _$();
 // all are equivalent
 empty[""] = 5;
 empty["_$"] = 5;
-empty[_$] = 5;  // depending on how function is converted to string this may accept any function, not just box.
-empty._$ = 5;  // simplest and safest alternative
+empty[_$] = 5;
+empty._$ = 5;  // simplest alternative
 // result: [5]
 
 empty._$ = 10;
