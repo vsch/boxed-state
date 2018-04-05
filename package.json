@@ -1,6 +1,6 @@
 {
   "name": "boxed-immutable",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "private": false,
   "description": "Immutable proxy wrapper with auto-vivification",
   "main": "index.js",
@@ -15,7 +15,9 @@
     "lodash.isfunction": "^3.0.9",
     "lodash.isstring": "^4.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jest-each": "^0.3.1"
+  },
   "scripts": {},
   "keywords": [
     "immutable",

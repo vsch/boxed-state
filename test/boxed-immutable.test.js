@@ -1,19 +1,14 @@
 "use strict";
-
+const each = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
-const _$ = boxedImmutable._$;
-const createBox = boxedImmutable.createBox;
-const Boxed = boxedImmutable.boxed.Boxed;
-const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
+const testUtil = require('./testUtil');
 
-function createBoxed(val) {
-    const boxedProxy = _$(val);
-    return {
-        origVal: val,
-        boxedProxy: boxedProxy,
-        boxedVal: boxedProxy[BOXED_GET_THIS],
-    };
-}
+const _$ = boxedImmutable._$;
+const isProxy = boxedImmutable.boxed.isBoxedProxy;
+const generateTestParams = testUtil.generateTestParams;
+const paramStringException = testUtil.paramStringException;
+const createBoxed = testUtil.createBoxed;
+const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
 describe('Boxed undefined Unmodified', () => {
     let origVal;
@@ -1066,7 +1061,7 @@ describe('Boxed Deep Nested New Mods', () => {
                 // fieldParam: 5,
                 newValue1: arr,
                 newValue2: { field: 25, },
-                },
+            },
             // oldValue2: "aValue",
             oldValue3: {
                 // fieldParam: 10,
@@ -1223,7 +1218,7 @@ describe('Boxed Deep Nested delta Mods', () => {
                 // fieldParam: 5,
                 newValue1: arr,
                 newValue2: { field: 25, },
-                },
+            },
             // oldValue2: "aValue",
             oldValue3: {
                 // fieldParam: 10,
@@ -1234,7 +1229,6 @@ describe('Boxed Deep Nested delta Mods', () => {
                 },
             },
         };
-
 
         origDeepDeltaValue = {
             oldValue: { newValue1: [5] },
@@ -1242,7 +1236,7 @@ describe('Boxed Deep Nested delta Mods', () => {
                 // fieldParam: 5,
                 newValue1: arr,
                 newValue2: { field: 25, },
-                },
+            },
             // oldValue2: "aValue",
             oldValue3: {
                 // fieldParam: 10,
@@ -1253,7 +1247,6 @@ describe('Boxed Deep Nested delta Mods', () => {
                 },
             },
         };
-
 
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;
@@ -1376,7 +1369,7 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
                 // fieldParam: 5,
                 newValue1: arr,
                 newValue2: { field: 25, },
-                },
+            },
             // oldValue2: "aValue",
             oldValue3: {
                 // fieldParam: 10,
@@ -1387,7 +1380,6 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
                 },
             },
         };
-
 
         origDeepDeltaValue = {
             oldValue: { newValue1: [5] },
@@ -1395,7 +1387,7 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
                 // fieldParam: 5,
                 newValue1: arr,
                 newValue2: { field: 25, },
-                },
+            },
             // oldValue2: "aValue",
             oldValue3: {
                 // fieldParam: 10,
@@ -1406,7 +1398,6 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
                 },
             },
         };
-
 
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;

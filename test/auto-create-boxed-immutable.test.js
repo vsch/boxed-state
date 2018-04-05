@@ -1,19 +1,15 @@
 "use strict";
 
+const each = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
-const _$ = boxedImmutable._$;
-const createBox = boxedImmutable.createBox;
-const Boxed = boxedImmutable.boxed.Boxed;
-const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
+const testUtil = require('./testUtil');
 
-function createBoxed(val) {
-    const boxedProxy = _$(val);
-    return {
-        origVal: val,
-        boxedProxy: boxedProxy,
-        boxedVal: boxedProxy[BOXED_GET_THIS],
-    };
-}
+const _$ = boxedImmutable._$;
+const isProxy = boxedImmutable.boxed.isBoxedProxy;
+const generateTestParams = testUtil.generateTestParams;
+const paramStringException = testUtil.paramStringException;
+const createBoxed = testUtil.createBoxed;
+const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
 describe('Create Array first level', () => {
     let origVal;
@@ -236,7 +232,7 @@ describe('Multiple modifications of same field', () => {
     let deepDeltaValue;
 
     beforeAll(() => {
-        let vals = createBoxed({field: ""});
+        let vals = createBoxed({ field: "" });
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;
         boxedProxy = vals.boxedProxy;
@@ -245,7 +241,7 @@ describe('Multiple modifications of same field', () => {
         boxedProxy.field_$ = 2;
         boxedProxy.field_$ = 3;
 
-        expectedValue = {field: 3};
+        expectedValue = { field: 3 };
         deepDeltaValue = deltaValue = expectedValue;
     });
 
@@ -276,7 +272,7 @@ describe('Default Value setting', () => {
     let deepDeltaValue;
 
     beforeAll(() => {
-        let vals = createBoxed({field1: ""});
+        let vals = createBoxed({ field1: "" });
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;
         boxedProxy = vals.boxedProxy;
@@ -288,8 +284,8 @@ describe('Default Value setting', () => {
         boxedProxy.field3_$.default$_$(2);
         boxedProxy.field3_$.default$_$(3);
 
-        expectedValue = {field1: "", field2: 2, field3:1, };
-        deepDeltaValue = deltaValue = {field2: 2, field3:1, };
+        expectedValue = { field1: "", field2: 2, field3: 1, };
+        deepDeltaValue = deltaValue = { field2: 2, field3: 1, };
     });
 
     test('value == modified', () => {
@@ -319,7 +315,7 @@ describe('Get prop', () => {
     let deepDeltaValue;
 
     beforeAll(() => {
-        let vals = createBoxed({field1: ""});
+        let vals = createBoxed({ field1: "" });
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;
         boxedProxy = vals.boxedProxy;
@@ -331,12 +327,12 @@ describe('Get prop', () => {
         boxedProxy.field3_$.default$_$(2);
         boxedProxy.field3_$.default$_$(3);
 
-        expectedValue = {field1: "", field2: 2, field3:1, };
-        deepDeltaValue = deltaValue = {field2: 2, field3:1, };
+        expectedValue = { field1: "", field2: 2, field3: 1, };
+        deepDeltaValue = deltaValue = { field2: 2, field3: 1, };
     });
 
     test('[prop].prop fails', () => {
-        expect(()=>{let t= boxedProxy[field10].flag}).toThrow(ReferenceError);
+        expect(() => {let t = boxedProxy[field10].flag}).toThrow(ReferenceError);
     });
 
     test('get$_$(prop).prop succeeds', () => {
