@@ -10,7 +10,7 @@ const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
-describe('.boolean$(value)', () => {
+describe('.boolean$_(value)', () => {
     const template = {
         invalid: [undefined, null, NaN,],
         falsy: [false, 0, '',],
@@ -34,18 +34,18 @@ describe('.boolean$(value)', () => {
                 boxedProxy = vals.boxedProxy;
             });
 
-            test(`_$(${thisTest.valueText}).boolean$ === ${!!thisTest.value}`, () => {
-                expect(boxedProxy.boolean$).toBe(!!thisTest.value);
+            test(`_$(${thisTest.valueText}).boolean$_ === ${!!thisTest.value}`, () => {
+                expect(boxedProxy.boolean$_).toBe(!!thisTest.value);
             });
-            test(`_$(${thisTest.valueText}).boolean$_$ === ${!!thisTest.value}`, () => {
-                expect(boxedProxy.boolean$_$).toBe(!!thisTest.value);
+            test(`_$(${thisTest.valueText}).boolean$_ === ${!!thisTest.value}`, () => {
+                expect(boxedProxy.boolean$_).toBe(!!thisTest.value);
             });
-            test(`_$().boolean$ = ${thisTest.valueText}; // === ${!!thisTest.value}`, () => {
-                boxedProxy.boolean$ = thisTest.value;
-                expect(boxedProxy.unboxed$).toBe(!!thisTest.value);
+            test(`_$().boolean$_ = ${thisTest.valueText}; // === ${!!thisTest.value}`, () => {
+                boxedProxy.boolean$_ = thisTest.value;
+                expect(boxedProxy.$_).toBe(!!thisTest.value);
             });
-            test(`_$().boolean$_$ = ${thisTest.valueText}; // === ${!!thisTest.value}`, () => {
-                boxedProxy.boolean$_$ = thisTest.value;
+            test(`_$().boolean$_ = ${thisTest.valueText}; // === ${!!thisTest.value}`, () => {
+                boxedProxy.boolean$_ = thisTest.value;
                 expect(boxedVal.value).toBe(!!thisTest.value);
             });
         });

@@ -3,6 +3,7 @@
 
 [TOC]: # " "
 
+- [Next: 0.2.10](#next-0210)
 - [0.2.8](#028)
 - [0.2.6](#026)
 - [0.2.4](#024)
@@ -16,6 +17,11 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## Next: 0.2.10                   
+
+* Fix: `boxOnDemand()` would wrap `save` and `cancel` in property and magical wrappers, if
+  `options.wrapProps` is `true`. 
 
 ## 0.2.8                   
 

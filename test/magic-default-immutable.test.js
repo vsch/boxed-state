@@ -11,11 +11,11 @@ const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
 // TEST: complete this test
-// call: .default$(value)
-// call boxed: .default$_$(value)
-// set: .default$ = value
-// set boxed: .default$_$ = value
-describe.skip('.default$ = value', () => {
+// call: .default$_(value)
+// call boxed: .default$_(value)
+// set: .default$_ = value
+// set boxed: .default$_ = value
+describe.skip('.default$_ = value', () => {
     const template = {
         invalid: [undefined, null, NaN,],
         falsy: [false, 0, '',],
@@ -87,9 +87,9 @@ describe.skip('.default$ = value', () => {
                             expect(proxyElement).not.toBe(boxedProxy);
                         });
 
-                        test(`${nestedTest.genTitle('.unboxed$_$ is undefined', '"_$"')}`, () => {
+                        test(`${nestedTest.genTitle('.$_ is undefined', '"_$"')}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value + "_$"];
-                            expect(proxyElement.unboxed$_$).toBe(undefined);
+                            expect(proxyElement.$_).toBe(undefined);
                         });
                     });
             });

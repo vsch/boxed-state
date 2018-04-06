@@ -41,9 +41,10 @@ function generateTestParams(template, customize) {
 }
 
 function paramStringException(paramValue, boxedValue) {
-    const valueIsString = util.isString(paramValue);
-    const paramIsNumeric = util.isNumericInteger(boxedValue);
-    return valueIsString && paramIsNumeric ? paramValue[boxedValue] : undefined;
+    // const valueIsString = util.isString(paramValue);
+    // const paramIsNumeric = util.isNumericInteger(boxedValue);
+    // return valueIsString && paramIsNumeric ? paramValue[boxedValue] : undefined;
+    return undefined;
 }
 
 function createBoxed(val) {

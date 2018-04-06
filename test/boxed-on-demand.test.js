@@ -30,8 +30,8 @@ describe('boxed on demand empty no changes', () => {
             saveCalled++;
             onDemand = {
                 state: modified,
-                delta: boxed.delta$_$,
-                deepDelta: boxed.delta$_$,
+                delta: boxed.delta$_,
+                deepDelta: boxed.delta$_,
             }
         });
 
@@ -87,8 +87,8 @@ describe('boxed on demand changes', () => {
             saveCalled++;
             onDemand = {
                 state: modified,
-                delta: boxed.delta$_$,
-                deepDelta: boxed.delta$_$,
+                delta: boxed.delta$_,
+                deepDelta: boxed.delta$_,
             }
         });
 
@@ -147,8 +147,8 @@ describe('boxed on demand external changes', () => {
             saveCalled++;
             onDemand = {
                 state: modified,
-                delta: boxed.delta$_$,
-                deepDelta: boxed.delta$_$,
+                delta: boxed.delta$_,
+                deepDelta: boxed.delta$_,
             }
         });
 
@@ -156,20 +156,20 @@ describe('boxed on demand external changes', () => {
     });
 
     test('Boxed gets new state saves', () => {
-        expect(boxedProxy.unboxed$_$).toBe(undefined);
+        expect(boxedProxy.$_).toBe(undefined);
         expect([getCalled, saveCalled]).toEqual([1, 0]);
-        expect(boxedProxy.field).toEqual(undefined);
+        expect(boxedProxy.field.$_).toEqual(undefined);
         expect([getCalled, saveCalled]).toEqual([1, 0]);
 
         onDemand = { field: 0 };
-        expect(boxedProxy.unboxed$_$).toBe(undefined);
-        expect(boxedProxy.unboxed$_$).toBe(undefined);
+        expect(boxedProxy.$_).toBe(undefined);
+        expect(boxedProxy.$_).toBe(undefined);
         boxedProxy.cancel();
 
-        expect(boxedProxy.unboxed$_$).toEqual({ field: 0 });
+        expect(boxedProxy.$_).toEqual({ field: 0 });
         expect([getCalled, saveCalled]).toEqual([2, 0]);
-        expect(boxedProxy.field).toEqual(0);
-        expect(boxedProxy.unboxed$_$).toEqual({ field: 0 });
+        expect(boxedProxy.field.$_).toEqual(0);
+        expect(boxedProxy.$_).toEqual({ field: 0 });
         expect([getCalled, saveCalled]).toEqual([2, 0]);
     });
 });
@@ -193,8 +193,8 @@ describe('boxed on demand no changes', () => {
         }, (modified, boxed) => {
             saveCalled++;
             origVal.state = modified;
-            origVal.delta = boxed.delta$_$;
-            origVal.deepDelta = boxed.delta$_$;
+            origVal.delta = boxed.delta$_;
+            origVal.deepDelta = boxed.delta$_;
         });
 
         boxedProxy = vals.boxedProxy;
@@ -243,8 +243,8 @@ describe('boxed on demand changes', () => {
         }, (modified, boxed) => {
             saveCalled++;
             origVal.state = modified;
-            origVal.delta = boxed.delta$_$;
-            origVal.deepDelta = boxed.delta$_$;
+            origVal.delta = boxed.delta$_;
+            origVal.deepDelta = boxed.delta$_;
         });
 
         boxedProxy = vals.boxedProxy;
@@ -291,8 +291,8 @@ describe('Boxed On Demand Updates', () => {
             return onDemand.state;
         }, (modified, boxed) => {
             origVal.state = modified;
-            origVal.delta = boxed.delta$_$;
-            origVal.deepDelta = boxed.delta$_$;
+            origVal.delta = boxed.delta$_;
+            origVal.deepDelta = boxed.delta$_;
         });
 
         boxedProxy = vals.boxedProxy;

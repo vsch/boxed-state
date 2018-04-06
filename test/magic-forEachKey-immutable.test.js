@@ -11,10 +11,10 @@ const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
 // TEST: complete this test
-// forEachKey$ 
-// forEachKey$_$ 
+// forEachKey$_ 
+// forEachKey$_ 
 // over array, over object, function only, filters, filters & options
-describe.skip('.boolean$(value)', () => {
+describe.skip('.boolean$_(value)', () => {
     const template = {
         invalid: [undefined, null, NaN,],
         falsy: [false, 0, '',],
@@ -86,9 +86,9 @@ describe.skip('.boolean$(value)', () => {
                             expect(proxyElement).not.toBe(boxedProxy);
                         });
 
-                        test(`${nestedTest.genTitle('.unboxed$_$ is undefined', '"_$"')}`, () => {
+                        test(`${nestedTest.genTitle('.$_ is undefined', '"_$"')}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value + "_$"];
-                            expect(proxyElement.unboxed$_$).toBe(undefined);
+                            expect(proxyElement.$_).toBe(undefined);
                         });
                     });
             });

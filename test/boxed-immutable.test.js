@@ -4,927 +4,237 @@ const boxedImmutable = require("boxed-immutable");
 const testUtil = require('./testUtil');
 
 const _$ = boxedImmutable._$;
+const util = boxedImmutable.util;
 const isProxy = boxedImmutable.boxed.isBoxedProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
-describe('Boxed undefined Unmodified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed(undefined);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
+each([
+    ['undefined', undefined],
+    ['{}', {}],
+    ['[]', []],
+])
+    .describe('Boxed %s unmodified', (typeDescription, type) => {
+        let origVal;
+        let boxedVal;
+        let boxedProxy;
+
+        beforeAll(() => {
+            let vals = createBoxed(type);
+            origVal = vals.origVal;
+            boxedVal = vals.boxedVal;
+            boxedProxy = vals.boxedProxy;
+        });
+
+        test('is proxied', () => {
+            expect(boxedProxy).not.toBe(undefined);
+        });
+
+        test('._$ proxy is proxy', () => {
+            expect(boxedProxy._$).toBe(boxedProxy);
+        });
+
+        test('.$_ value is value', () => {
+            expect(boxedProxy.$_).toBe(boxedVal.value);
+        });
+
+        test('valueOf() === value', () => {
+            expect(boxedVal.valueOf()).toBe(boxedVal.value);
+        });
+
+        test('value === original', () => {
+            expect(boxedVal.value).toBe(origVal);
+        });
+
+        test('valueOf() === original', () => {
+            expect(boxedVal.valueOf()).toBe(origVal);
+        });
+
+        test('nested property is proxied', () => {
+            const nonexistent = boxedProxy.nonexistent;
+            expect(nonexistent._$).toBe(nonexistent);
+        });
+
+        test('nested property values undefined', () => {
+            expect(boxedProxy.nonexistent.property.$_).toBe(undefined);
+        });
+
+        test('modified$_ is undefined', () => {
+            expect(boxedProxy.modified$_).toBe(undefined);
+        });
+
+        test('delta$_ is undefined', () => {
+            expect(boxedProxy.delta$_).toBe(undefined);
+        });
+
+        test('deepDelta$_ is undefined', () => {
+            expect(boxedProxy.deepDelta$_).toBe(undefined);
+        });
+    });
+
+each([
+    ['1. undefined', undefined, { newProp: 5 }],
+    ['2. null', null, { newProp: 5 }],
+    ['3. {}', {}, { newProp: 5 }],
+    ['4. []', [], { newProp: 5 }],
+    ['5. { oldValue: "old" }', { oldValue: "old" }, { newProp: 5 }],
+    ['6. []', [], { "": [5] }],
+    ['7. []', [], { "_$": [5] }],
+    ['8. []', [], { "._$": [5] }],
+    ['9. []', [], { _$: [5] }],
+    ['10. [5]', [], { "": [5] }],
+    ['11. [5]', [], { "_$": [5] }],
+    ['12. [5]', [], { "._$": [5] }],
+    ['13. [5]', [], { _$: [5] }],
+    ['14. [5]', [], { 0: 5 }],
+    ['15. [10]', [], { 0: 5 }],
+    ['16. [10]', [], { 0: 5, _$: [20], }],
+])
+    .describe('Boxed %s modified', (typeDescription, type, params) => {
+        let origVal;
+        let boxedVal;
+        let boxedProxy;
+        let expected;
+        let delta;
+
+        beforeAll(() => {
+            let vals = createBoxed(type);
+            origVal = vals.origVal;
+            boxedVal = vals.boxedVal;
+            boxedProxy = vals.boxedProxy;
+            expected = util.isObject(origVal) && util.isArray(origVal) ? util.copyArrayObject(origVal) : Object.assign({}, origVal);
+            delta = util.isObject(origVal) && util.isArray(origVal) ? [] : {};
+
+            for (let param in params) {
+                if (params.hasOwnProperty(param)) {
+                    if (param === "" || param === "_$" || param === "._$" || param === boxedVal.context.globalBox) {
+                        let values = params[param];
+                        let iMax = values.length;
+                        for (let i = 0; i < iMax; i++) {
+                            if (param === '._$') {
+                                boxedProxy._$ = values[i];
+                            } else {
+                                boxedProxy[param] = values[i];
+                            }
+
+                            if (util.isArray(expected)) {
+                                delta[expected.length] = values[i];
+                                expected.push(values[i]);
+                            } else {
+                                delta[i] = values[i];
+                                expected[i] = values[i];
+                            }
+                        }
+                    } else {
+                        boxedProxy[param] = params[param];
+                        expected[param] = params[param];
+                        delta[param] = params[param];
+                    }
+                }
+            }
+        });
+
+        test('is proxied', () => {
+            expect(boxedProxy).not.toBe(undefined);
+        });
+
+        test('._$ proxy is proxy', () => {
+            expect(boxedProxy._$).toBe(boxedProxy);
+        });
+
+        test('valueOf() === value', () => {
+            expect(boxedVal.valueOf()).toBe(boxedVal.value);
+        });
+
+        test('value !== original', () => {
+            expect(boxedVal.value).not.toBe(origVal);
+        });
+
+        test('value === expected', () => {
+            expect(boxedVal.value).toEqual(expected);
+        });
+
+        test('modified$_ === value', () => {
+            expect(boxedProxy.modified$_).toBe(boxedVal.value);
+        });
+
+        test('delta$_ == delta', () => {
+            expect(boxedProxy.delta$_).toEqual(delta);
+        });
+
+        test('deepDelta$_ == delta', () => {
+            expect(boxedProxy.deepDelta$_).toEqual(delta);
+        });
+    });
+
+// these assign via .$_
+each([
+    ['1. undefined', undefined, { newProp: 5 }],
+    ['2. null', null, { newProp: 5 }],
+    ['3. {}', {}, { newProp: 5 }],
+    ['4. []', [], { newProp: 5 }],
+    ['5. { oldValue: "old" }', { oldValue: "old" }, { newProp: 5 }],
+    ['6. [5]', [], { 0: 5 }],
+    ['7. [10]', [], { 0: 5 }],
+])
+    .describe('Boxed %s modified via .$_', (typeDescription, type, params) => {
+        let origVal;
+        let boxedVal;
+        let boxedProxy;
+        let expected;
+        let delta;
+
+        beforeAll(() => {
+            let vals = createBoxed(type);
+            origVal = vals.origVal;
+            boxedVal = vals.boxedVal;
+            boxedProxy = vals.boxedProxy;
+            expected = util.isObject(origVal) && util.isArray(origVal) ? util.copyArrayObject(origVal) : Object.assign({}, origVal);
+            delta = util.isObject(origVal) && util.isArray(origVal) ? [] : {};
+
+            for (let param in params) {
+                if (params.hasOwnProperty(param)) {
+                    boxedProxy[param].$_ = params[param];
+                    expected[param] = params[param];
+                    delta[param] = params[param];
+                }
+            }
+        });
+
+        test('is proxied', () => {
+            expect(boxedProxy).not.toBe(undefined);
+        });
+
+        test('._$ proxy is proxy', () => {
+            expect(boxedProxy._$).toBe(boxedProxy);
+        });
+
+        test('valueOf() === value', () => {
+            expect(boxedVal.valueOf()).toBe(boxedVal.value);
+        });
+
+        test('value !== original', () => {
+            expect(boxedVal.value).not.toBe(origVal);
+        });
+
+        test('value === expected', () => {
+            expect(boxedVal.value).toEqual(expected);
+        });
+
+        test('modified$_ === value', () => {
+            expect(boxedProxy.modified$_).toBe(boxedVal.value);
+        });
+
+        test('delta$_ == delta', () => {
+            expect(boxedProxy.delta$_).toEqual(delta);
+        });
+
+        test('deepDelta$_ == delta', () => {
+            expect(boxedProxy.deepDelta$_).toEqual(delta);
+        });
     });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).toBe(origVal);
-    });
-
-    test('valueOf() === original', () => {
-        expect(boxedVal.valueOf()).toBe(origVal);
-    });
-
-    test('non-nested properties undefined', () => {
-        expect(boxedProxy.nonexistent).toBe(undefined);
-    });
-
-    test('non-nested properties undefined', () => {
-        expect(boxedProxy["nonexistent"]).toBe(undefined);
-    });
-
-    test('non-nested properties undefined', () => {
-        expect(boxedProxy[5]).toBe(undefined);
-    });
-
-    test('nested properties throw', () => {
-        expect(() => boxedProxy.nonexistent.property).toThrow(TypeError);
-    });
-
-    test('nested properties throw', () => {
-        expect(() => boxedProxy.nonexistent.property.value).toThrow(TypeError);
-    });
-
-    test('non-nested wrapped property is proxied', () => {
-        const nonexistent$ = boxedProxy.nonexistent_$;
-        expect(nonexistent$._$).toBe(nonexistent$);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$.property).toBe(undefined);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$["property"]).toBe(undefined);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$.property_$.value).toBe(undefined);
-    });
-
-    test('modified$_$ is undefined', () => {
-        expect(boxedProxy.modified$_$).toBe(undefined);
-    });
-
-    test('delta$_$ is undefined', () => {
-        expect(boxedProxy.delta$_$).toBe(undefined);
-    });
-
-    test('deepDelta$_$ is undefined', () => {
-        expect(boxedProxy.deepDelta$_$).toBe(undefined);
-    });
-});
-
-describe('Boxed Empty Unmodified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed({});
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).toBe(origVal);
-    });
-
-    test('valueOf() === original', () => {
-        expect(boxedVal.valueOf()).toBe(origVal);
-    });
-
-    test('non-nested properties undefined', () => {
-        expect(boxedProxy.nonexistent).toBe(undefined);
-    });
-
-    test('nested properties throw', () => {
-        expect(() => boxedProxy.nonexistent.property).toThrow(TypeError);
-    });
-
-    test('nested properties undefined', () => {
-        expect(() => boxedProxy.nonexistent.property.value).toThrow(TypeError);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$.property).toBe(undefined);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$.property_$.value).toBe(undefined);
-    });
-
-    test('modified$_$ is undefined', () => {
-        expect(boxedProxy.modified$_$).toBe(undefined);
-    });
-
-    test('delta$_$ is undefined', () => {
-        expect(boxedProxy.delta$_$).toBe(undefined);
-    });
-
-    test('deepDelta$_$ is undefined', () => {
-        expect(boxedProxy.deepDelta$_$).toBe(undefined);
-    });
-});
-
-describe('Boxed Empty Array Unmodified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).toBe(origVal);
-    });
-
-    test('valueOf() === original', () => {
-        expect(boxedVal.valueOf()).toBe(origVal);
-    });
-
-    test('non-nested properties undefined', () => {
-        expect(boxedProxy.nonexistent).toBe(undefined);
-    });
-
-    test('nested properties throw', () => {
-        expect(() => boxedProxy.nonexistent.property).toThrow(TypeError);
-    });
-
-    test('nested properties undefined', () => {
-        expect(() => boxedProxy.nonexistent.property.value).toThrow(TypeError);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$.property).toBe(undefined);
-    });
-
-    test('non-nested wrapped properties undefined', () => {
-        expect(boxedProxy.nonexistent_$.property_$.value).toBe(undefined);
-    });
-
-});
-
-describe('Boxed undefined Modified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed({});
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy.newProp = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value !== original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual({ newProp: 5 });
-    });
-
-    test('modified$_$ === value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Empty Modified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed({});
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy.newProp = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual({ newProp: 5 });
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Object param', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed({});
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy[{ abc: "abc" }] = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value !== modified', () => {
-        let value = {};
-        value[{ abc: "abc" }] = 5;
-        expect(boxedVal.value).toEqual(value);
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Non-Empty Modified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed({ oldValue: "old" });
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy.newProp = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual({ oldValue: "old", newProp: 5 });
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ != value', () => {
-        expect(boxedProxy.delta$_$).not.toEqual(boxedVal.value);
-    });
-
-    test('delta$_$ == delta of mods', () => {
-        expect(boxedProxy.delta$_$).toEqual({ newProp: 5 });
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ != value', () => {
-        expect(boxedProxy.deepDelta$_$).not.toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == delta of mods', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual({ newProp: 5 });
-    });
-});
-
-describe('Boxed Non-Empty Overwrite', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed({ oldValue: "old" });
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy.oldValue = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual({ oldValue: 5 });
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Empty Array Modified', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy.newProp = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        let value = [];
-        value["newProp"] = 5;
-        expect(boxedVal.value).toEqual(value);
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Empty Array Append to End with [""]', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy[""] = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual([5]);
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Empty Array Append to End with ["_$"]', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy["_$"] = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual([5]);
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Empty Array Append to End with [_$]', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy[_$] = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual([5]);
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Empty Array Append to With ._$ = ...', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy._$ = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual([5]);
-    });
-
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Non-Empty Array Append to End', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([10]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy[_$] = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value === modified', () => {
-        expect(boxedVal.value).toEqual([10, 5]);
-    });
-
-    test('modified$_$ === value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual([10, 5]);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual([undefined, 5]);
-    });
-});
-
-describe('Boxed Non-Empty Array Overwrite', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([10]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy[0] = 5;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value == modified', () => {
-        expect(boxedVal.value).toEqual([5]);
-    });
-
-    test('modified$_$ === value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == value', () => {
-        expect(boxedProxy.delta$_$).toEqual(boxedVal.value);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == value', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedVal.value);
-    });
-});
-
-describe('Boxed Non-Empty Array Overwrite/Append', () => {
-    let origVal;
-    let boxedVal;
-    let boxedProxy;
-
-    beforeAll(() => {
-        let vals = createBoxed([20, 10]);
-        origVal = vals.origVal;
-        boxedVal = vals.boxedVal;
-        boxedProxy = vals.boxedProxy;
-        boxedProxy[0] = 5;
-        boxedProxy[_$] = 15;
-    });
-
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
-    });
-
-    test('._$ proxy is proxy', () => {
-        expect(boxedProxy._$).toBe(boxedProxy);
-    });
-
-    test('valueOf() === value', () => {
-        expect(boxedVal.valueOf()).toBe(boxedVal.value);
-    });
-
-    test('value === original', () => {
-        expect(boxedVal.value).not.toBe(origVal);
-    });
-
-    test('value == modified', () => {
-        expect(boxedVal.value).toEqual([5, 10, 15]);
-    });
-
-    test('modified$_$ === value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
-    });
-
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('delta$_$ == mods', () => {
-        expect(boxedProxy.delta$_$).toEqual([5, 10, 15]);
-    });
-
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
-    });
-
-    test('deepDelta$_$ == delta$_$', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual([5, undefined, 15]);
-    });
-});
 
 describe('Boxed Non-Empty Multi-Mods One Copy', () => {
     let origVal;
@@ -967,8 +277,8 @@ describe('Boxed Non-Empty Multi-Mods One Copy', () => {
         expect(boxedVal.value).toEqual([10, 55, 30, 45, 35]);
     });
 
-    test('modified$_$ === value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
+    test('modified$_ === value', () => {
+        expect(boxedProxy.modified$_).toBe(boxedVal.value);
     });
 
     test('first mod !== original', () => {
@@ -1023,36 +333,36 @@ describe('Boxed Non Empty Array Modified with property', () => {
         expect(boxedVal.value).toEqual(value);
     });
 
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
+    test('modified$_ is value', () => {
+        expect(boxedProxy.modified$_).toBe(boxedVal.value);
     });
 
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
+    test('delta$_ !== value', () => {
+        expect(boxedProxy.delta$_).not.toBe(boxedVal.value);
     });
 
-    test('delta$_$ != value', () => {
-        expect(boxedProxy.delta$_$).not.toEqual(boxedVal.value);
+    test('delta$_ != value', () => {
+        expect(boxedProxy.delta$_).not.toEqual(boxedVal.value);
     });
 
-    test('delta$_$ == delta of mods', () => {
+    test('delta$_ == delta of mods', () => {
         let value = [];
         value["newProp"] = 5;
-        expect(boxedProxy.delta$_$).toEqual(value);
+        expect(boxedProxy.delta$_).toEqual(value);
     });
 
-    test('deepDelta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
+    test('deepDelta$_ !== value', () => {
+        expect(boxedProxy.delta$_).not.toBe(boxedVal.value);
     });
 
-    test('deepDelta$_$ != value', () => {
-        expect(boxedProxy.deepDelta$_$).not.toEqual(boxedVal.value);
+    test('deepDelta$_ != value', () => {
+        expect(boxedProxy.deepDelta$_).not.toEqual(boxedVal.value);
     });
 
-    test('deepDelta$_$ == delta of mods', () => {
+    test('deepDelta$_ == delta of mods', () => {
         let value = [];
         value["newProp"] = 5;
-        expect(boxedProxy.deepDelta$_$).toEqual(value);
+        expect(boxedProxy.deepDelta$_).toEqual(value);
     });
 
 });
@@ -1133,21 +443,21 @@ describe('Boxed Deep Nested New Mods', () => {
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
         }
-        boxedProxy.oldValue_$.newValue1_$[_$] = 5;
+        boxedProxy.oldValue.newValue1[_$] = 5;
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
         }
-        boxedProxy.oldValue1_$.newValue1_$[5] = 15;
+        boxedProxy.oldValue1.newValue1[5] = 15;
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
         }
-        boxedProxy.oldValue1_$.newValue2_$.field = 25;
+        boxedProxy.oldValue1.newValue2.field = 25;
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
         }
-        boxedProxy.oldValue3_$.fieldParam_$ = 10;
-        boxedProxy.oldValue3_$.fieldParam2_$ = 10;
-        boxedProxy.oldValue3_$.newValue2_$["field"] = 25;
+        boxedProxy.oldValue3.fieldParam = 10;
+        boxedProxy.oldValue3.fieldParam2 = 10;
+        boxedProxy.oldValue3.newValue2["field"] = 25;
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
         }
@@ -1173,24 +483,24 @@ describe('Boxed Deep Nested New Mods', () => {
         expect(boxedVal.value).toEqual(expectedValue);
     });
 
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
+    test('modified$_ is value', () => {
+        expect(boxedProxy.modified$_).toBe(boxedVal.value);
     });
 
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
+    test('delta$_ !== value', () => {
+        expect(boxedProxy.delta$_).not.toBe(boxedVal.value);
     });
 
-    test('delta$_$ == delta', () => {
-        expect(boxedProxy.delta$_$).toEqual(deltaValue);
+    test('delta$_ == delta', () => {
+        expect(boxedProxy.delta$_).toEqual(deltaValue);
     });
 
-    test('deepDelta$_$ !== delta', () => {
-        expect(boxedProxy.deepDelta$_$).not.toEqual(boxedProxy.delta$_$);
+    test('deepDelta$_ !== delta', () => {
+        expect(boxedProxy.deepDelta$_).not.toEqual(boxedProxy.delta$_);
     });
 
-    test('deepDelta$_$ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(deepDeltaValue);
+    test('deepDelta$_ == deepDelta', () => {
+        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
     });
 });
 
@@ -1305,7 +615,7 @@ describe('Boxed Deep Nested delta Mods', () => {
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;
         boxedProxy = vals.boxedProxy;
-        boxedProxy.delta$_$ = deltaValue;
+        boxedProxy.delta$_ = deltaValue;
 
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
@@ -1332,28 +642,28 @@ describe('Boxed Deep Nested delta Mods', () => {
         expect(boxedVal.value).toEqual(expectedValue);
     });
 
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
+    test('modified$_ is value', () => {
+        expect(boxedProxy.modified$_).toBe(boxedVal.value);
     });
 
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
+    test('delta$_ !== value', () => {
+        expect(boxedProxy.delta$_).not.toBe(boxedVal.value);
     });
 
-    test('delta$_$ == delta', () => {
-        expect(boxedProxy.delta$_$).toEqual(deltaValue);
+    test('delta$_ == delta', () => {
+        expect(boxedProxy.delta$_).toEqual(deltaValue);
     });
 
     test('delta param not modified', () => {
         expect(deltaValue).toEqual(origDeltaValue);
     });
 
-    test('deepDelta$_$ == delta', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(boxedProxy.delta$_$);
+    test('deepDelta$_ == delta', () => {
+        expect(boxedProxy.deepDelta$_).toEqual(boxedProxy.delta$_);
     });
 
-    test('deepDelta$_$ == delta', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(deltaValue);
+    test('deepDelta$_ == delta', () => {
+        expect(boxedProxy.deepDelta$_).toEqual(deltaValue);
     });
 
     test('deepDelta param not modified', () => {
@@ -1456,7 +766,7 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
         origVal = vals.origVal;
         boxedVal = vals.boxedVal;
         boxedProxy = vals.boxedProxy;
-        boxedProxy.deepDelta$_$ = deepDeltaValue;
+        boxedProxy.deepDelta$_ = deepDeltaValue;
 
         if (boxedProxy._$ !== boxedProxy) {
             const tmp = 0;
@@ -1483,24 +793,24 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
         expect(boxedVal.value).toEqual(expectedValue);
     });
 
-    test('modified$_$ is value', () => {
-        expect(boxedProxy.modified$_$).toBe(boxedVal.value);
+    test('modified$_ is value', () => {
+        expect(boxedProxy.modified$_).toBe(boxedVal.value);
     });
 
-    test('delta$_$ !== value', () => {
-        expect(boxedProxy.delta$_$).not.toBe(boxedVal.value);
+    test('delta$_ !== value', () => {
+        expect(boxedProxy.delta$_).not.toBe(boxedVal.value);
     });
 
-    test('delta$_$ == delta', () => {
-        expect(boxedProxy.delta$_$).toEqual(deltaValue);
+    test('delta$_ == delta', () => {
+        expect(boxedProxy.delta$_).toEqual(deltaValue);
     });
 
-    test('deepDelta$_$ !== delta', () => {
-        expect(boxedProxy.deepDelta$_$).not.toEqual(boxedProxy.delta$_$);
+    test('deepDelta$_ !== delta', () => {
+        expect(boxedProxy.deepDelta$_).not.toEqual(boxedProxy.delta$_);
     });
 
-    test('deepDelta$_$ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_$).toEqual(deepDeltaValue);
+    test('deepDelta$_ == deepDelta', () => {
+        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
     });
 
     test('deepDelta param not modified', () => {
