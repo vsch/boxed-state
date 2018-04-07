@@ -2,16 +2,20 @@
 
 const each = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
-const util = boxedImmutable.util;
 const testUtil = require('./testUtil');
-
+const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
-const isProxy = boxedImmutable.boxed.isBoxedProxy;
+
+const isObject = util.isObject;
+const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
+const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
+const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
+const toTypeString = testUtil.toTypeString;
 
 describe('Boxing of simple values', () => {
     const template = {
@@ -73,29 +77,28 @@ describe('Boxing of simple values', () => {
 
                 each(nestedParams)
                     .describe(`%s`, (nestedDescription, nestedTest) => {
-                        test(`${nestedTest.genTitle(' is ' + (JSON.stringify(paramStringException(thisTest.value, nestedTest.value)) || 'undefined'))}`, () => {
+                        test(`${nestedTest.genTitle('.$_ is ' + (JSON.stringify(paramStringException(thisTest.value, nestedTest.value)) || 'undefined'))}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value];
                             const paramResult = paramStringException(thisTest.value, nestedTest.value);
-                            expect(proxyElement.$_).toBe(paramResult);
+                            expect(proxyElement.$_).toEqual(isObject(thisTest.value) ? paramResult : undefined);
                         });
 
-                        test(`${nestedTest.genTitle(' isProxy', '"_$"')}`, () => {
+                        test(`${nestedTest.genTitle(' isProxy', '')}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value];
-                            expect(isProxy(proxyElement)).toBe(true);
+                            expect(!!isBoxedProxy(proxyElement)).toBe(true);
                         });
 
-                        test(`${nestedTest.genTitle(' is not parent', '"_$"')}`, () => {
-                            let proxyElement = vals.boxedProxy[nestedTest.value + "_$"];
+                        test(`${nestedTest.genTitle(' is not parent', '')}`, () => {
+                            let proxyElement = vals.boxedProxy[nestedTest.value];
                             expect(proxyElement).not.toBe(boxedProxy);
                         });
 
-                        test(`${nestedTest.genTitle('.$_ is undefined', '"_$"')}`, () => {
-                            let proxyElement = vals.boxedProxy[nestedTest.value + "_$"];
+                        test(`${nestedTest.genTitle('.$_ is undefined', '')}`, () => {
+                            let proxyElement = vals.boxedProxy[nestedTest.value];
                             expect(proxyElement.$_).toBe(undefined);
                         });
                     });
             });
         });
-
 });
 

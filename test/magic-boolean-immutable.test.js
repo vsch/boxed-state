@@ -10,7 +10,7 @@ const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
 
-describe('.boolean$_(value)', () => {
+describe.skip('.boolean$_(value)', () => {
     const template = {
         invalid: [undefined, null, NaN,],
         falsy: [false, 0, '',],

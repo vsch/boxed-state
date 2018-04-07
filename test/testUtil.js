@@ -1,10 +1,10 @@
 const boxedImmutable = require("boxed-immutable");
 const _$ = boxedImmutable._$;
 const createBox = boxedImmutable.createBox;
-const Boxed = boxedImmutable.boxed.Boxed;
+const Boxed = boxedImmutable.boxed.Box;
 const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
 const isProxy = boxedImmutable.boxed.isBoxedProxy;
-const boxedThis = boxedImmutable.boxed.boxedThis;
+const boxedThis = boxedImmutable.boxed.thisBox;
 const boxOnDemand = boxedImmutable.boxed.boxOnDemand;
 const util = boxedImmutable.util;
 
@@ -17,7 +17,7 @@ function generateTestParams(template, customize) {
             for (let i = 0; i < iMax; i++) {
                 let value = values[i];
                 let ofTotal = values.length;
-                const valueText = value === undefined ? 'undefined' : Number.isNaN(value) ? 'NaN' : JSON.stringify(value);
+                const valueText = toTypeString(value);
                 const testThis = {
                     type: type,
                     value: value,
@@ -44,15 +44,17 @@ function paramStringException(paramValue, boxedValue) {
     // const valueIsString = util.isString(paramValue);
     // const paramIsNumeric = util.isNumericInteger(boxedValue);
     // return valueIsString && paramIsNumeric ? paramValue[boxedValue] : undefined;
-    return undefined;
+    // if (valueIsString) undefined;
+    return paramValue;
 }
 
 function createBoxed(val) {
     const boxedProxy = _$(val);
+    const boxVal = boxedProxy[BOXED_GET_THIS];
     return {
         origVal: val,
         boxedProxy: boxedProxy,
-        boxedVal: boxedProxy[BOXED_GET_THIS],
+        boxedVal: boxVal,
     };
 }
 
@@ -63,6 +65,11 @@ function createOnDemandBoxed(get, set) {
     };
 }
 
+function toTypeString(value) {
+    return value === undefined ? 'undefined' : Number.isNaN(value) ? 'NaN' : JSON.stringify(value);
+}
+
+module.exports.toTypeString = toTypeString;
 module.exports.generateTestParams = generateTestParams;
 module.exports.paramStringException = paramStringException;
 module.exports.createBoxed = createBoxed;

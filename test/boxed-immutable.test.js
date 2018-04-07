@@ -2,14 +2,18 @@
 const each = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
 const testUtil = require('./testUtil');
-
-const _$ = boxedImmutable._$;
 const util = boxedImmutable.util;
-const isProxy = boxedImmutable.boxed.isBoxedProxy;
+const _$ = boxedImmutable._$;
+
+const isObject = util.isObject;
+const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
+const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
+const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createOnDemandBoxed;
+const toTypeString = testUtil.toTypeString;
 
 each([
     ['undefined', undefined],
@@ -20,6 +24,8 @@ each([
         let origVal;
         let boxedVal;
         let boxedProxy;
+        let boxedInProxy;
+        let boxedOutProxy;
 
         beforeAll(() => {
             let vals = createBoxed(type);
@@ -28,16 +34,25 @@ each([
             boxedProxy = vals.boxedProxy;
         });
 
-        test('is proxied', () => {
-            expect(boxedProxy).not.toBe(undefined);
+        test('isBoxedProxy() === boxedProxy', () => {
+            expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
         });
 
-        test('._$ proxy is proxy', () => {
+        test('_$ === proxy', () => {
             expect(boxedProxy._$).toBe(boxedProxy);
         });
 
-        test('.$_ value is value', () => {
-            expect(boxedProxy.$_).toBe(boxedVal.value);
+        test('_$ === boxedInProxy', () => {
+            expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+        });
+
+        test('$_ === boxedOutProxy or value', () => {
+            const boxedOut$_ = boxedProxy.$_;
+            expect(boxedOut$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        });
+
+        test('value$_ === value', () => {
+            expect(boxedProxy.value$_).toBe(boxedVal.value);
         });
 
         test('valueOf() === value', () => {
@@ -136,12 +151,25 @@ each([
             }
         });
 
-        test('is proxied', () => {
-            expect(boxedProxy).not.toBe(undefined);
+        test('isBoxedProxy() === boxedProxy', () => {
+            expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
         });
 
-        test('._$ proxy is proxy', () => {
+        test('_$ === proxy', () => {
             expect(boxedProxy._$).toBe(boxedProxy);
+        });
+
+        test('_$ === boxedInProxy', () => {
+            expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+        });
+
+        test('$_ === boxedOutProxy or value', () => {
+            const boxedOut$_ = boxedProxy.$_;
+            expect(boxedOut$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        });
+
+        test('value$_ === value', () => {
+            expect(boxedProxy.value$_).toBe(boxedVal.value);
         });
 
         test('valueOf() === value', () => {
@@ -203,12 +231,24 @@ each([
             }
         });
 
-        test('is proxied', () => {
-            expect(boxedProxy).not.toBe(undefined);
+        test('isBoxedProxy() === boxedProxy', () => {
+            expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
         });
 
-        test('._$ proxy is proxy', () => {
+        test('_$ === proxy', () => {
             expect(boxedProxy._$).toBe(boxedProxy);
+        });
+
+        test('_$ === boxedInProxy', () => {
+            expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+        });
+
+        test('$_ === boxedOutProxy or value', () => {
+            expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        });
+
+        test('value$_ === value', () => {
+            expect(boxedProxy.value$_).toBe(boxedVal.value);
         });
 
         test('valueOf() === value', () => {
@@ -257,12 +297,24 @@ describe('Boxed Non-Empty Multi-Mods One Copy', () => {
         boxedValue3 = boxedVal.value;
     });
 
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
+    test('isBoxedProxy() === boxedProxy', () => {
+        expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
     });
 
-    test('._$ proxy is proxy', () => {
+    test('_$ === proxy', () => {
         expect(boxedProxy._$).toBe(boxedProxy);
+    });
+
+    test('_$ === boxedInProxy', () => {
+        expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+    });
+
+    test('$_ === boxedOutProxy or value', () => {
+        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+    });
+
+    test('value$_ === value', () => {
+        expect(boxedProxy.value$_).toBe(boxedVal.value);
     });
 
     test('valueOf() === value', () => {
@@ -311,12 +363,24 @@ describe('Boxed Non Empty Array Modified with property', () => {
         boxedProxy.newProp = 5;
     });
 
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
+    test('isBoxedProxy() === boxedProxy', () => {
+        expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
     });
 
-    test('._$ proxy is proxy', () => {
+    test('_$ === proxy', () => {
         expect(boxedProxy._$).toBe(boxedProxy);
+    });
+
+    test('_$ === boxedInProxy', () => {
+        expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+    });
+
+    test('$_ === boxedOutProxy or value', () => {
+        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+    });
+
+    test('value$_ === value', () => {
+        expect(boxedProxy.value$_).toBe(boxedVal.value);
     });
 
     test('valueOf() === value', () => {
@@ -463,12 +527,24 @@ describe('Boxed Deep Nested New Mods', () => {
         }
     });
 
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
+    test('isBoxedProxy() === boxedProxy', () => {
+        expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
     });
 
-    test('._$ proxy === proxy', () => {
+    test('_$ === proxy', () => {
         expect(boxedProxy._$).toBe(boxedProxy);
+    });
+
+    test('_$ === boxedInProxy', () => {
+        expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+    });
+
+    test('$_ === boxedOutProxy or value', () => {
+        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+    });
+
+    test('value$_ === value', () => {
+        expect(boxedProxy.value$_).toBe(boxedVal.value);
     });
 
     test('valueOf() === value', () => {
@@ -622,12 +698,24 @@ describe('Boxed Deep Nested delta Mods', () => {
         }
     });
 
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
+    test('isBoxedProxy() === boxedProxy', () => {
+        expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
     });
 
-    test('._$ proxy === proxy', () => {
+    test('_$ === proxy', () => {
         expect(boxedProxy._$).toBe(boxedProxy);
+    });
+
+    test('_$ === boxedInProxy', () => {
+        expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+    });
+
+    test('$_ === boxedOutProxy or value', () => {
+        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+    });
+
+    test('value$_ === value', () => {
+        expect(boxedProxy.value$_).toBe(boxedVal.value);
     });
 
     test('valueOf() === value', () => {
@@ -773,12 +861,24 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
         }
     });
 
-    test('is proxied', () => {
-        expect(boxedProxy).not.toBe(undefined);
+    test('isBoxedProxy() === boxedProxy', () => {
+        expect(isBoxedProxy(boxedProxy)).toBe(boxedVal);
     });
 
-    test('._$ proxy === proxy', () => {
+    test('_$ === proxy', () => {
         expect(boxedProxy._$).toBe(boxedProxy);
+    });
+
+    test('_$ === boxedInProxy', () => {
+        expect(boxedProxy._$).toBe(boxedVal.boxedInProxy);
+    });
+
+    test('$_ === boxedOutProxy or value', () => {
+        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+    });
+
+    test('value$_ === value', () => {
+        expect(boxedProxy.value$_).toBe(boxedVal.value);
     });
 
     test('valueOf() === value', () => {
