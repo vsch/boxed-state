@@ -1,9 +1,8 @@
 # Version History
 
-
 [TOC]: # " "
 
-- [Next: 0.2.10](#next-0210)
+- [0.3.0](#030)
 - [0.2.8](#028)
 - [0.2.6](#026)
 - [0.2.4](#024)
@@ -18,10 +17,15 @@
 - [0.1.0](#010)
 
 
-## Next: 0.2.10                   
+## 0.3.0                   
 
-* Fix: `boxOnDemand()` would wrap `save` and `cancel` in property and magical wrappers, if
-  `options.wrapProps` is `true`. 
+* Change: completely reworked the concept and implementation to make it less error prone and
+  work with IDE completions for properties. Adding a suffix to a property in previous
+  implementation would break the IDE completions and was a pain to type in.
+* Add: start a wiki for the project
+* Change: Move most of the readme file to wiki
+* Add: Transforms to transform the object state either on load state or on property
+  modification. [Transforms](https://github.com/vsch/boxed-immutable/wiki/Transforms)
 
 ## 0.2.8                   
 
@@ -82,7 +86,7 @@
   was already modified in the parent.
 * Add: `default$_$` magic property which only changes value if it is `undefined`, otherwise a
   noop. Use: `boxed.field_$.default$_$ = value;` or `boxed.field_$.default$_$(value)`
-* Add: `boxOnDemand` proxy wrapper to allow creating a boxed state with `save()` and `cancel()`
+* Add: `boxState` proxy wrapper to allow creating a boxed state with `save()` and `cancel()`
   methods. It provides a new copy of the state if it has changed from last access.
 
 ## 0.1.3

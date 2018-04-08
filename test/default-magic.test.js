@@ -8,14 +8,14 @@ const isProxy = boxedImmutable.boxed.isBoxedProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
-const createOnDemandBoxed = testUtil.createOnDemandBoxed;
+const createOnDemandBoxed = testUtil.createBoxedState;
 
 // TEST: complete this test
-// call: .default$_(value)
-// call boxed: .default$_(value)
-// set: .default$_ = value
-// set boxed: .default$_ = value
-describe.skip('.default$_ = value', () => {
+// call: .$_default(value)
+// call boxed: .$_default(value)
+// set: .$_default = value
+// set boxed: .$_default = value
+describe.skip('.$_default = value', () => {
     const template = {
         invalid: [undefined, null, NaN,],
         falsy: [false, 0, '',],
@@ -61,7 +61,7 @@ describe.skip('.default$_ = value', () => {
                     invalid: [undefined, null, NaN,],
                     falsy: [false, 0,],
                     number: [-3, -2, -1, 1, 2, 3, 1.5, -1.5],
-                    string: ['$', '$_', '_$_', 'field', '_$field', 'field$_', '$_field', 'field$_1', 'field_$_'],
+                    string: ['$', '$_', '$__', 'field', '_$field', '$_field', '$_field', '$_field1', '$_field_'],
                 };
 
                 let nestedParams = generateTestParams(template, (t) => {
@@ -96,4 +96,122 @@ describe.skip('.default$_ = value', () => {
         });
 
 });
+
+const state = {
+    oldString: "oldString",
+    oldNumber: 0,
+    oldObj: {
+        oldProp: "oldProp",
+        nestedProp: {
+            oldProp: "oldProp",
+        },
+    },
+    oldArr: [1, 2],
+};
+
+const expectedShallow = {
+    oldString: "oldString",
+    oldNumber: 0,
+    defString: "defString",
+    defNum: -20,
+    oldObj: {
+        oldProp: "oldProp",
+        nestedProp: {
+            oldProp: "oldProp",
+        },
+    },
+    oldArr: [1, 2],
+};
+
+const expectedLevels2 = {
+    oldString: "oldString",
+    oldNumber: 0,
+    defString: "defString",
+    defNum: -20,
+    oldObj: {
+        oldProp: "oldProp",
+        defaultProp: "defaultProp",
+        nestedProp: {
+            oldProp: "oldProp",
+        },
+    },
+    oldArr: [1, 2],
+};
+
+const expectedDeep = {
+    oldString: "oldString",
+    oldNumber: 0,
+    defString: "defString",
+    defNum: -20,
+    oldObj: {
+        oldProp: "oldProp",
+        defaultProp: "defaultProp",
+        nestedProp: {
+            oldProp: "oldProp",
+            defProp: "defProp",
+        },
+    },
+    oldArr: [1, 2],
+};
+
+const defaults = {
+    oldString: "defaultString",
+    defString: "defString",
+    oldNumber: 10,
+    defNum: -20,
+    oldObj: {
+        oldProp: "defProp",
+        defaultProp: "defaultProp",
+        nestedProp: {
+            oldProp: "defaultProp",
+            defProp: "defProp",
+        },
+    },
+    oldArr: [0, 10, 20],
+};
+
+each([
+    ['deep', 'deep'],
+    ['merge', 'merge'],
+    ['1000', '1000'],
+    ['{levels:"deep"}', { levels: "deep" }],
+    ['{levels:"merge"}', { levels: "merge" }],
+    ['{levels:"1000"}', { levels: "1000" }],
+])
+    .describe('Deep with: %s', (text, type) => {
+        test(`default_$(${text})`, () => {
+            const boxedProxy = _$(state);
+            boxedProxy.default_$(type, defaults);
+            const result = boxedProxy();
+            expect(result).toEqual(expectedDeep);
+        });
+    });
+
+each([
+    ['shallow', 'shallow'],
+    ['1', '1'],
+    ['{levels:"shallow"}', { levels: "shallow" }],
+    ['{levels:"1"}', { levels: "1" }],
+])
+    .describe('Shallow with: %s', (text, type) => {
+        test(`default_$(${text})`, () => {
+            const boxedProxy = _$(state);
+            boxedProxy.default_$(type, defaults);
+            const result = boxedProxy();
+            expect(result).toEqual(expectedShallow);
+        });
+    });
+
+each([
+    ['2', '2'],
+    ['{levels:"2"}', { levels: "2" }],
+])
+    .describe('Levels with: %s', (text, type) => {
+        test(`default_$(${text})`, () => {
+            const boxedProxy = _$(state);
+            boxedProxy.default_$(type, defaults);
+            const result = boxedProxy();
+            expect(result).toEqual(expectedLevels2);
+        });
+    });
 

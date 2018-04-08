@@ -9,7 +9,7 @@ const isProxy = boxedImmutable.boxed.isBoxedProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
-const createOnDemandBoxed = testUtil.createOnDemandBoxed;
+const createOnDemandBoxed = testUtil.createBoxedState;
 
 describe('Create Array first level', () => {
     let origVal;
@@ -36,16 +36,16 @@ describe('Create Array first level', () => {
         expect(boxedVal.value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toBe(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toBe(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual(boxedProxy.delta$_);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual(boxedProxy.$_delta);
     });
 });
 
@@ -78,16 +78,16 @@ describe('Create Array add props', () => {
         expect(value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toEqual(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toEqual(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual(deepDeltaValue);
     });
 });
 
@@ -122,16 +122,16 @@ describe('Create Object add indices', () => {
         expect(value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toEqual(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toEqual(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual(deepDeltaValue);
     });
 });
 
@@ -166,16 +166,16 @@ describe('Create Object add indices', () => {
         expect(value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toEqual(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toEqual(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual(deepDeltaValue);
     });
 });
 
@@ -210,16 +210,16 @@ describe('delta and deepDelta of Array should return 0..lastModified index, othe
         expect(value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toEqual(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toEqual(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual([undefined, undefined, 12, undefined, undefined, 15, undefined, 17]);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual([undefined, undefined, 12, undefined, undefined, 15, undefined, 17]);
     });
 });
 
@@ -250,16 +250,16 @@ describe('Multiple modifications of same field', () => {
         expect(value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toEqual(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toEqual(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual(deepDeltaValue);
     });
 });
 
@@ -277,12 +277,12 @@ describe('Default Value setting', () => {
         boxedVal = vals.boxedVal;
         boxedProxy = vals.boxedProxy;
 
-        boxedProxy.field1.default$_ = 1;
-        boxedProxy.field2.default$_ = 2;
-        boxedProxy.field2.default$_ = 3;
-        boxedProxy.field3.default$_(1);
-        boxedProxy.field3.default$_(2);
-        boxedProxy.field3.default$_(3);
+        boxedProxy.field1.$_default = 1;
+        boxedProxy.field2.$_default = 2;
+        boxedProxy.field2.$_default = 3;
+        boxedProxy.field3.$_default(1);
+        boxedProxy.field3.$_default(2);
+        boxedProxy.field3.$_default(3);
 
         expectedValue = { field1: "", field2: 2, field3: 1, };
         deepDeltaValue = deltaValue = { field2: 2, field3: 1, };
@@ -293,16 +293,16 @@ describe('Default Value setting', () => {
         expect(value).toEqual(expectedValue);
     });
 
-    test('modified$_ is value', () => {
-        expect(boxedProxy.modified$_).toEqual(boxedVal.value);
+    test('$_modified is value', () => {
+        expect(boxedProxy.$_modified).toEqual(boxedVal.value);
     });
 
-    test('delta$_ == delta', () => {
-        expect(boxedProxy.delta$_).toEqual(deltaValue);
+    test('$_delta == delta', () => {
+        expect(boxedProxy.$_delta).toEqual(deltaValue);
     });
 
-    test('deepDelta$_ == deepDelta', () => {
-        expect(boxedProxy.deepDelta$_).toEqual(deepDeltaValue);
+    test('$_deepDelta == deepDelta', () => {
+        expect(boxedProxy.$_deepDelta).toEqual(deepDeltaValue);
     });
 });
 

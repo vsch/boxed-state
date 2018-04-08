@@ -3,13 +3,20 @@
 const each = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
 const testUtil = require('./testUtil');
-
+const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
-const isProxy = boxedImmutable.boxed.isBoxedProxy;
+
+const isObject = util.isObject;
+const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
+const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
+const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
-const createOnDemandBoxed = testUtil.createOnDemandBoxed;
+const createOnDemandBoxed = testUtil.createBoxedState;
+const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
+const toTypeString = testUtil.toTypeString;
+const createBoxedState = testUtil.createBoxedState;
 
 describe('boxed on demand empty no changes', () => {
     let onDemand;
@@ -23,15 +30,15 @@ describe('boxed on demand empty no changes', () => {
         saveCalled = 0;
         getCalled = 0;
 
-        let vals = createOnDemandBoxed(() => {
+        let vals = createBoxedState(() => {
             getCalled++;
             return onDemand || origVal;
         }, (modified, boxed) => {
             saveCalled++;
             onDemand = {
                 state: modified,
-                delta: boxed.delta$_,
-                deepDelta: boxed.delta$_,
+                delta: boxed.$_delta,
+                deepDelta: boxed.$_delta,
             }
         });
 
@@ -80,15 +87,15 @@ describe('boxed on demand changes', () => {
         saveCalled = 0;
         getCalled = 0;
 
-        let vals = createOnDemandBoxed(() => {
+        let vals = createBoxedState(() => {
             getCalled++;
             return onDemand || origVal;
         }, (modified, boxed) => {
             saveCalled++;
             onDemand = {
                 state: modified,
-                delta: boxed.delta$_,
-                deepDelta: boxed.delta$_,
+                delta: boxed.$_delta,
+                deepDelta: boxed.$_delta,
             }
         });
 
@@ -140,15 +147,15 @@ describe('boxed on demand external changes', () => {
         saveCalled = 0;
         getCalled = 0;
 
-        let vals = createOnDemandBoxed(() => {
+        let vals = createBoxedState(() => {
             getCalled++;
             return onDemand || origVal;
         }, (modified, boxed) => {
             saveCalled++;
             onDemand = {
                 state: modified,
-                delta: boxed.delta$_,
-                deepDelta: boxed.delta$_,
+                delta: boxed.$_delta,
+                deepDelta: boxed.$_delta,
             }
         });
 
@@ -187,14 +194,14 @@ describe('boxed on demand no changes', () => {
         saveCalled = 0;
         getCalled = 0;
 
-        let vals = createOnDemandBoxed(() => {
+        let vals = createBoxedState(() => {
             getCalled++;
             return onDemand.state;
         }, (modified, boxed) => {
             saveCalled++;
             origVal.state = modified;
-            origVal.delta = boxed.delta$_;
-            origVal.deepDelta = boxed.delta$_;
+            origVal.delta = boxed.$_delta;
+            origVal.deepDelta = boxed.$_delta;
         });
 
         boxedProxy = vals.boxedProxy;
@@ -237,14 +244,14 @@ describe('boxed on demand changes', () => {
         saveCalled = 0;
         getCalled = 0;
 
-        let vals = createOnDemandBoxed(() => {
+        let vals = createBoxedState(() => {
             getCalled++;
             return onDemand.state;
         }, (modified, boxed) => {
             saveCalled++;
             origVal.state = modified;
-            origVal.delta = boxed.delta$_;
-            origVal.deepDelta = boxed.delta$_;
+            origVal.delta = boxed.$_delta;
+            origVal.deepDelta = boxed.$_delta;
         });
 
         boxedProxy = vals.boxedProxy;
@@ -287,12 +294,12 @@ describe('Boxed On Demand Updates', () => {
         origVal = { state: {} };
         onDemand = {};
 
-        let vals = createOnDemandBoxed(() => {
+        let vals = createBoxedState(() => {
             return onDemand.state;
         }, (modified, boxed) => {
             origVal.state = modified;
-            origVal.delta = boxed.delta$_;
-            origVal.deepDelta = boxed.delta$_;
+            origVal.delta = boxed.$_delta;
+            origVal.deepDelta = boxed.$_delta;
         });
 
         boxedProxy = vals.boxedProxy;

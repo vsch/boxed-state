@@ -12,7 +12,7 @@ const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
-const createOnDemandBoxed = testUtil.createOnDemandBoxed;
+const createOnDemandBoxed = testUtil.createBoxedState;
 const toTypeString = testUtil.toTypeString;
 
 each([

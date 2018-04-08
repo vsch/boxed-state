@@ -5,7 +5,7 @@ const Boxed = boxedImmutable.boxed.Box;
 const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
 const isProxy = boxedImmutable.boxed.isBoxedProxy;
 const boxedThis = boxedImmutable.boxed.thisBox;
-const boxOnDemand = boxedImmutable.boxed.boxOnDemand;
+const boxState = boxedImmutable.boxed.boxState;
 const util = boxedImmutable.util;
 
 function generateTestParams(template, customize) {
@@ -40,16 +40,17 @@ function generateTestParams(template, customize) {
     return innerParams;
 }
 
-function paramStringException(paramValue, boxedValue) {
-    // const valueIsString = util.isString(paramValue);
-    // const paramIsNumeric = util.isNumericInteger(boxedValue);
-    // return valueIsString && paramIsNumeric ? paramValue[boxedValue] : undefined;
+function paramStringException(arg, param) {
+    // const valueIsString = util.isString(arg);
+    // const paramIsNumeric = util.isNumericInteger(param);
+    // return valueIsString && paramIsNumeric ? arg[param] : undefined;
     // if (valueIsString) undefined;
-    return paramValue;
+    return util.isObject(arg) ? arg[param] : undefined;
 }
 
-function createBoxed(val) {
-    const boxedProxy = _$(val);
+function createBoxed(val, box) {
+    box = box || _$;
+    const boxedProxy = box(val);
     const boxVal = boxedProxy[BOXED_GET_THIS];
     return {
         origVal: val,
@@ -58,8 +59,8 @@ function createBoxed(val) {
     };
 }
 
-function createOnDemandBoxed(get, set) {
-    const boxedProxy = boxOnDemand(get, set);
+function createBoxedState(get, set) {
+    const boxedProxy = boxState(get, set);
     return {
         boxedProxy: boxedProxy,
     };
@@ -69,8 +70,22 @@ function toTypeString(value) {
     return value === undefined ? 'undefined' : Number.isNaN(value) ? 'NaN' : JSON.stringify(value);
 }
 
+function arrayToObject(arr, except) {
+    let dst = {};
+    let keys = Object.keys(arr);
+    let i = keys.length;
+    while (i--) {
+        const key = keys[i];
+        if (!except || except.indexOf(key) === -1) { 
+            dst[key] = arr[key];
+        }
+    }
+    return dst;
+}
+
 module.exports.toTypeString = toTypeString;
 module.exports.generateTestParams = generateTestParams;
 module.exports.paramStringException = paramStringException;
 module.exports.createBoxed = createBoxed;
-module.exports.createOnDemandBoxed = createOnDemandBoxed;
+module.exports.createBoxedState = createBoxedState;
+module.exports.arrayToObject = arrayToObject;
