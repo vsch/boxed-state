@@ -18,10 +18,11 @@ const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
 const toTypeString = testUtil.toTypeString;
 const createBoxedState = testUtil.createBoxedState;
 
-describe('boxed on demand empty no changes', () => {
+describe('boxed on demand internal ops', () => {
     let onDemand;
     let origVal;
     let boxedProxy;
+    let boxedVal;
     let saveCalled;
     let getCalled;
 
@@ -43,6 +44,51 @@ describe('boxed on demand empty no changes', () => {
         });
 
         boxedProxy = vals.boxedProxy;
+        boxedVal = vals.boxedVal;
+    });
+
+    test('Boxed does not change', () => {
+        expect(boxedVal.boxed).toBe(undefined);
+        expect([getCalled, saveCalled]).toEqual([0, 0]);
+        
+        let boxed = boxedProxy._$;
+        expect(boxedVal.boxed).not.toBe(undefined);
+        expect([getCalled, saveCalled]).toEqual([1, 0]);
+        boxedProxy.cancel();
+        expect(boxedVal.boxed).toBe(undefined);
+        expect([getCalled, saveCalled]).toEqual([1, 0]);
+        let tmp = boxedProxy.value;
+        expect(boxedVal.boxed).not.toBe(undefined);
+    });
+});
+
+describe('boxed on demand empty no changes', () => {
+    let onDemand;
+    let origVal;
+    let boxedProxy;
+    let boxedVal;
+    let saveCalled;
+    let getCalled;
+
+    beforeAll(() => {
+        origVal = undefined;
+        saveCalled = 0;
+        getCalled = 0;
+
+        let vals = createBoxedState(() => {
+            getCalled++;
+            return onDemand || origVal;
+        }, (modified, boxed) => {
+            saveCalled++;
+            onDemand = {
+                state: modified,
+                delta: boxed.$_delta,
+                deepDelta: boxed.$_delta,
+            }
+        });
+
+        boxedProxy = vals.boxedProxy;
+        boxedVal = vals.boxedVal;
     });
 
     test('Boxed does not change', () => {

@@ -1,6 +1,6 @@
 {
   "name": "boxed-immutable",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "private": false,
   "description": "Immutable proxy wrapper with exception free access to nested properties and auto-instantiation of intermediate containers when nested properties are defined",
   "main": "index.js",

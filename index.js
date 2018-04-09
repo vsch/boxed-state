@@ -9,7 +9,7 @@ boxed.boxState = boxedState.boxState;
 
 module.exports = {
     default: boxed.box,
-    _$: boxed.box,
+    "_$": boxed.box,
     box: boxed.box,
     createBox: boxed.createBox,
     boxState: boxed.boxState,

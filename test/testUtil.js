@@ -59,10 +59,22 @@ function createBoxed(val, box) {
     };
 }
 
+function createTransformedBoxed(options, val, box) {
+    box = box || _$;
+    const boxedProxy = box.withBoxOptions(options, val);
+    const boxVal = boxedProxy[BOXED_GET_THIS];
+    return {
+        origVal: val,
+        boxedProxy: boxedProxy,
+        boxedVal: boxVal,
+    };
+}
+
 function createBoxedState(get, set) {
     const boxedProxy = boxState(get, set);
     return {
         boxedProxy: boxedProxy,
+        boxedVal: boxedProxy[BOXED_GET_THIS],
     };
 }
 
@@ -87,5 +99,6 @@ module.exports.toTypeString = toTypeString;
 module.exports.generateTestParams = generateTestParams;
 module.exports.paramStringException = paramStringException;
 module.exports.createBoxed = createBoxed;
+module.exports.createTransformedBoxed = createTransformedBoxed;
 module.exports.createBoxedState = createBoxedState;
 module.exports.arrayToObject = arrayToObject;

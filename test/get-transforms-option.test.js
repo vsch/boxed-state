@@ -13,6 +13,7 @@ const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
+const createTransformedBoxed = testUtil.createTransformedBoxed;
 const createOnDemandBoxed = testUtil.createBoxedState;
 const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
 const toTypeString = testUtil.toTypeString;
@@ -139,6 +140,10 @@ const applied = {
     anotherArr: [1, 2, 3, 4],
 };
 
+function createTransformedBox() {
+    return createTransformedBoxed({ getTransforms: getTransforms }, ...arguments);
+}
+
 describe('getTransforms applied to props', () => {
     let origVal;
     let boxedVal;
@@ -147,26 +152,56 @@ describe('getTransforms applied to props', () => {
 
     let box;
 
-    beforeAll(() => {
-        box = boxedImmutable.createBox({ getTransforms: getTransforms });
-    });
+    // beforeAll(() => {
+    //     box = boxedImmutable.createBox({ getTransforms: getTransforms });
+    // });
 
     test(`getTransforms applied to value`, () => {
-        const vals = createBoxed(original, box);
+        const vals = createTransformedBox(original);
         const { origVal, boxedVal, boxedProxy } = vals;
 
         expect(boxedVal.value).toEqual(applied);
     });
 
     test(`getTransforms get modified`, () => {
-        const vals = createBoxed(original, box);
+        const vals = createTransformedBox(original);
         const { origVal, boxedVal, boxedProxy } = vals;
-        expect(boxedVal.valueOfModified()).toEqual(undefined);
+        expect(boxedVal.valueOfModified()).toEqual(boxedVal.value);
+    });
+
+    test(`getTransforms get delta`, () => {
+        const vals = createTransformedBox(original);
+        const { origVal, boxedVal, boxedProxy } = vals;
+        expect(boxedVal.unboxedDelta()).toEqual({
+            "boolean": true,
+            "booleanArr": [false, false, false, false, true, true, true, true, true],
+            "capitalized": "LOWERCASE",
+            "nested": {
+                "another": "someValue",
+                "boolean": false,
+                "capitalized": 5,
+                "nested": { "another": "someValue", "boolean": false, "capitalized": null },
+            }
+        });
+    });
+
+    test(`getTransforms get deep delta`, () => {
+        const vals = createTransformedBox(original);
+        const { origVal, boxedVal, boxedProxy } = vals;
+        expect(boxedVal.unboxedDeepDelta()).toEqual({
+            "boolean": true,
+            "booleanArr": [false, false, false, false, true, true, true, true, true],
+            "capitalized": "LOWERCASE",
+            "nested": {
+                "another": "someValue", "boolean": false, "capitalized": 5,
+                "nested": { "another": "someValue", "boolean": false, "capitalized": null }
+            },
+        });
     });
 
     test(`with totals`, () => {
         const withTotals = [1, 2, 3, 4];
-        const vals = createBoxed({withTotals:withTotals}, box);
+        const vals = createTransformedBox({ withTotals: withTotals });
         const { origVal, boxedVal, boxedProxy } = vals;
 
         withTotals.total = withTotals.reduce((prev, value) => (prev || 0) + value);
@@ -175,9 +210,28 @@ describe('getTransforms applied to props', () => {
         expect(testUtil.arrayToObject(boxedVal.valueOf().withTotals, ['totaled'])).toEqual(testUtil.arrayToObject(withTotals));
     });
 
+    test(`with root custom`, () => {
+        const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
+        const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, };
+        const vals = createTransformedBoxed({
+            getTransforms: {
+                '': function (value, prop, oldValue, getProp, setProp) {
+                    if (util.endsWith(prop, 'Flag')) {
+                        return !!value;
+                    }
+                    return value;
+                }
+            }
+        }, withTotals);
+        const { origVal, boxedVal, boxedProxy } = vals;
+
+        // expect(boxedVal.value.withTotals.total).toEqual(withTotals.total);
+        expect(boxedVal.valueOf()).toEqual(expected);
+    });
+
     test(`with rounded mods`, () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        const vals = createBoxed({withRounded:withTotals}, box);
+        const vals = createTransformedBox({ withRounded: withTotals });
         const { origVal, boxedVal, boxedProxy } = vals;
 
         withTotals = withTotals.map(roundTransform);
@@ -189,7 +243,7 @@ describe('getTransforms applied to props', () => {
 
     test(`with object totals`, () => {
         const withTotals = [1, 2, 3, 4];
-        const vals = createBoxed({withTotals:withTotals}, box);
+        const vals = createTransformedBox({ withTotals: withTotals });
         const { origVal, boxedVal, boxedProxy } = vals;
 
         withTotals.total = withTotals.reduce((prev, value) => (prev || 0) + value);
@@ -200,10 +254,10 @@ describe('getTransforms applied to props', () => {
 
     test(`with object rounded mods`, () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        const vals = createBoxed({withRounded:withTotals}, box);
+        const vals = createTransformedBox({ withRounded: withTotals });
         const { origVal, boxedVal, boxedProxy } = vals;
         withTotals = withTotals.map(roundTransform);
-        
+
         // withTotals.total = withTotals.reduce((prev, value, index) => (prev || 0) + value);
 
         // expect(boxedVal.value.withTotals.total).toEqual(withTotals.total);
@@ -212,9 +266,9 @@ describe('getTransforms applied to props', () => {
 
     test(`with object rounded totals mods`, () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        const vals = createBoxed({withRoundedTotals:withTotals}, box);
+        const vals = createTransformedBox({ withRoundedTotals: withTotals });
         const { origVal, boxedVal, boxedProxy } = vals;
-        
+
         withTotals = withTotals.map(roundTransform);
         withTotals.total = withTotals.reduce((prev, value, index) => (prev || 0) + value);
 

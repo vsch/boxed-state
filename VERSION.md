@@ -2,6 +2,7 @@
 
 [TOC]: # " "
 
+- [0.3.2](#032)
 - [0.3.0](#030)
 - [0.2.8](#028)
 - [0.2.6](#026)
@@ -16,6 +17,15 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## 0.3.2                   
+
+* Add: `.withBoxOptions(options)` function to box creation functions so that a transforms
+  customized box can be created from a single box function without needing to create one for
+  each type of transform.
+* Add: box options to `boxState(getState, saveState, options)` so that it will create customized
+  boxes if any box specific options are passed in options. Eliminates the need to have a custom
+  created box to provide transforms.
 
 ## 0.3.0                   
 
