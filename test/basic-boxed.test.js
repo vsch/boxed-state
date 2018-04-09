@@ -316,3 +316,18 @@ describe('Boxing of simple values', () => {
         });
 });
 
+test('Unboxes boxed values on assignment', () => {
+    let origVal;
+    let boxedVal;
+    let boxedProxy;
+    let vals;
+
+    vals = createBoxed({oldProp:'abc'});
+    origVal = vals.origVal;
+    boxedVal = vals.boxedVal;
+    boxedProxy = vals.boxedProxy;
+    boxedProxy.newProp = boxedProxy.oldProp; 
+    const t = boxedProxy.$_value;
+    expect(t).toEqual({oldProp:'abc', newProp:'abc'});
+});
+

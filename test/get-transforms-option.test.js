@@ -91,20 +91,38 @@ const getTransforms = {
         },
     },
     booleanArr: {
-        '': booleanTransform,
+        '_$': booleanTransform,
     },
     withTotals: {
-        '': totalTransform,
+        '_$': totalTransform,
     },
     withRounded: {
-        '': roundTransform,
+        '_$': roundTransform,
     },
     withRoundedTotals: {
-        '': [roundTransform, totalTransform],
+        '_$': [roundTransform, totalTransform],
     },
 };
 
 const original = {
+    capitalized: 'lowercase',
+    boolean: {},
+    another: 'someValue',
+    nested: {
+        capitalized: 5,
+        boolean: 0,
+        another: 'someValue',
+        nested: {
+            capitalized: null,
+            boolean: NaN,
+            another: 'someValue',
+        },
+    },
+    booleanArr: [undefined, null, NaN, 0, true, '0', 'abc', 'def', 10],
+    anotherArr: [1, 2, 3, 4],
+};
+
+const originalCopy = {
     capitalized: 'lowercase',
     boolean: {},
     another: 'someValue',
@@ -163,6 +181,12 @@ describe('getTransforms applied to props', () => {
         expect(boxedVal.value).toEqual(applied);
     });
 
+    test(`getTransforms original unmodified`, () => {
+        const vals = createTransformedBox(original);
+        const { origVal, boxedVal, boxedProxy } = vals;
+        expect(original).toEqual(originalCopy);
+    });
+
     test(`getTransforms get modified`, () => {
         const vals = createTransformedBox(original);
         const { origVal, boxedVal, boxedProxy } = vals;
@@ -215,7 +239,7 @@ describe('getTransforms applied to props', () => {
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, };
         const vals = createTransformedBoxed({
             getTransforms: {
-                '': function (value, prop, oldValue, getProp, setProp) {
+                '_$': function (value, prop, oldValue, getProp, setProp) {
                     if (util.endsWith(prop, 'Flag')) {
                         return !!value;
                     }

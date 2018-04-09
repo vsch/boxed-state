@@ -2,6 +2,7 @@
 
 [TOC]: # " "
 
+- [0.4.0](#040)
 - [0.3.2](#032)
 - [0.3.0](#030)
 - [0.2.8](#028)
@@ -17,6 +18,14 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## 0.4.0                   
+
+* Change: Remove "" as array end and match all transforms. Use only "_$" instead to prevent ""
+  from not being usable as a general property.
+* Fix: set prop did not unbox boxed values which were passed in. 
+* Add: `.$_path` and `.path_$` take string argument and interpret is as a nested property path,
+  return final proxy or value.
 
 ## 0.3.2                   
 

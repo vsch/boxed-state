@@ -164,16 +164,16 @@ const setTransforms = {
         },
     },
     booleanArr: {
-        '': booleanTransform,
+        '_$': booleanTransform,
     },
     withTotals: {
-        '': totalTransform,
+        '_$': totalTransform,
     },
     withRounded: {
-        '': roundTransform,
+        '_$': roundTransform,
     },
     withRoundedTotals: {
-        '': [roundTransform, totalTransform],
+        '_$': [roundTransform, totalTransform],
     },
 };
 
@@ -277,7 +277,7 @@ describe('setTransforms applied to props', () => {
     test(`with root custom modified`, () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, };
-        const vals = createTransformedBoxed({ setTransforms: {'': function (value, prop, oldValue, getProp, setProp) {
+        const vals = createTransformedBoxed({ setTransforms: {'_$': function (value, prop, oldValue, getProp, setProp) {
                     if (util.endsWith(prop,'Flag')) {
                         return !!value;
                     }
@@ -294,7 +294,7 @@ describe('setTransforms applied to props', () => {
     test(`with root custom new prop`, () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, newFlag:true };
-        const vals = createTransformedBoxed({ setTransforms: {'': function (value, prop, oldValue, getProp, setProp) {
+        const vals = createTransformedBoxed({ setTransforms: {'_$': function (value, prop, oldValue, getProp, setProp) {
                     if (util.endsWith(prop,'Flag')) {
                         return !!value;
                     }
@@ -311,7 +311,7 @@ describe('setTransforms applied to props', () => {
     test(`with root custom modified new prop`, () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, newFlag:true };
-        const vals = createTransformedBoxed({ setTransforms: {'': function (value, prop, oldValue, getProp, setProp) {
+        const vals = createTransformedBoxed({ setTransforms: {'_$': function (value, prop, oldValue, getProp, setProp) {
                     if (util.endsWith(prop,'Flag')) {
                         return !!value;
                     }
@@ -344,7 +344,7 @@ describe('setTransforms applied to props', () => {
         const withTotals = [1.5, 2.5, 3.5, 4.5];
         boxedProxy.withTotals = withTotals;
 
-        boxedProxy.withTotals[''] = 10.5;
+        boxedProxy.withTotals._$ = 10.5;
         withTotals.push(10.5);
 
         withTotals.total = withTotals.reduce((prev, value) => (prev || 0) + value);
@@ -374,7 +374,7 @@ describe('setTransforms applied to props', () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
         boxedProxy.withRounded = withTotals;
 
-        boxedProxy.withRounded[''] = 10.5;
+        boxedProxy.withRounded._$ = 10.5;
         withTotals.push(10.5);
 
         withTotals = withTotals.map(roundTransform);
@@ -390,7 +390,7 @@ describe('setTransforms applied to props', () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
         boxedProxy.withRoundedTotals = withTotals;
 
-        boxedProxy.withRoundedTotals[''] = 10.5;
+        boxedProxy.withRoundedTotals._$ = 10.5;
         withTotals.push(10.5);
 
         withTotals = withTotals.map(roundTransform);
@@ -418,7 +418,7 @@ describe('setTransforms applied to props', () => {
         const withTotals = [1.5, 2.5, 3.5, 4.5];
         boxedProxy.withTotals = util.copyArrayObject(withTotals);
 
-        boxedProxy.withTotals[''] = 10.5;
+        boxedProxy.withTotals._$ = 10.5;
         withTotals.push(10.5);
 
         withTotals.total = withTotals.reduce((prev, value) => (prev || 0) + value);
@@ -448,7 +448,7 @@ describe('setTransforms applied to props', () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
         boxedProxy.withRounded = util.copyArrayObject(withTotals);
 
-        boxedProxy.withRounded[''] = 10.5;
+        boxedProxy.withRounded._$ = 10.5;
         withTotals.push(10.5);
 
         withTotals = withTotals.map(roundTransform);
@@ -464,7 +464,7 @@ describe('setTransforms applied to props', () => {
         let withTotals = [1.5, 2.5, 3.5, 4.5];
         boxedProxy.withRoundedTotals = util.copyArrayObject(withTotals);
 
-        boxedProxy.withRoundedTotals[''] = 10.5;
+        boxedProxy.withRoundedTotals._$ = 10.5;
         withTotals.push(10.5);
 
         withTotals = withTotals.map(roundTransform);
