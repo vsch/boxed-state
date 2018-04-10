@@ -2,7 +2,7 @@
 
 [TOC]: # " "
 
-- [0.4.0](#040)
+- [Next: 0.4.2](#next-042)
 - [0.3.2](#032)
 - [0.3.0](#030)
 - [0.2.8](#028)
@@ -19,13 +19,17 @@
 - [0.1.0](#010)
 
 
-## 0.4.0                   
+## Next: 0.4.2                   
 
 * Change: Remove "" as array end and match all transforms. Use only "_$" instead to prevent ""
   from not being usable as a general property.
 * Fix: set prop did not unbox boxed values which were passed in. 
 * Add: `.$_path` and `.path_$` take string argument and interpret is as a nested property path,
   return final proxy or value.
+* Add: second arg to path, uses it to set before returning. If val sets, if func sets it to
+  returned value, if no extra args passes boxed-out or boxed-in proxy to func, if extra args,
+  passes boxed-out proxy value for `.path_$` and value for `.$_path` as this, rest of args as args.
+* [ ] To Document above change.
 
 ## 0.3.2                   
 

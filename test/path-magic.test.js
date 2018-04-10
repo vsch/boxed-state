@@ -53,9 +53,29 @@ describe('Path tests', () => {
                 expect(pathVal.$_value).toBe(path);
             });
 
+            test(`path_$(${path}, (val)=>'prefix.' + val) === prefix.${path}`, () => {
+                let pathVal = boxedProxy.path_$(path, (val) => 'prefix.' + val());
+                expect(pathVal.$_value).toBe('prefix.' + path);
+            });
+            
+            test(`path_$(${path}, String.prototype.toUpperCase, undefined) === prefix.${path}`, () => {
+                let pathVal = boxedProxy.path_$(path, String.prototype.toUpperCase, undefined);
+                expect(pathVal()).toBe(path.toUpperCase());
+            });
+            
             test(`$_path(${path}) === ${path}`, () => {
                 let pathVal = boxedProxy.$_path(path);
                 expect(pathVal).toBe(path);
+            });
+
+            test(`$_path(${path}, (val)=>'prefix.' + val) === prefix.${path}`, () => {
+                let pathVal = boxedProxy.$_path(path, (val) => 'prefix.' + val);
+                expect(pathVal).toBe('prefix.' + path);
+            });
+            
+            test(`$_path(${path}, String.prototype.toUpperCase, undefined) === prefix.${path}`, () => {
+                let pathVal = boxedProxy.$_path(path, String.prototype.toUpperCase, undefined);
+                expect(pathVal).toBe(path.toUpperCase());
             });
         });
 });
