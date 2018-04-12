@@ -63,7 +63,7 @@ each([
             const box = isBoxedInProxy(target);
             expect(!!box).toBe(true);
         });
-        
+
         test(`isBoxedOutProxy(${'_$('}${toTypeString(value)})) === ${toTypeString(false)}`, () => {
             const target = _$(value);
             const box = isBoxedOutProxy(target);
@@ -83,5 +83,10 @@ test(`keys .$_`, () => {
     const boxedIn = target.$_;
     const keys = Object.keys(boxedIn);
     expect(keys).toEqual([]);
+});
+
+test(`mergeDefaultProperties({ obj:{ a: 'a', } }, { obj:{a:'a', b:{}}});`, () => {
+    const result = util.mergeDefaultProperties({ obj: { a: 'a', } }, { obj: { a: 'a', b: {} } }, 99, false);
+    expect(result).toEqual({"obj": {"a": "a", "b": {}}});
 });
 

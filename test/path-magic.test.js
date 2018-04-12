@@ -58,6 +58,18 @@ describe('Path tests', () => {
                 expect(pathVal.$_value).toBe('prefix.' + path);
             });
             
+            test(`path_$(${path})._$ = 'prefix.'+ ${path} === prefix.${path}`, () => {
+                let pathVal = boxedProxy.path_$(path)('prefix.' + path);
+                // let pathVal = boxedProxy.path_$(path);
+                expect(pathVal.$_value).toBe('prefix.' + path);
+            });
+            
+            test(`path_$(${path}).$_value = 'prefix.'+ ${path} === prefix.${path}`, () => {
+                boxedProxy.path_$(path).$_value = 'prefix.' + path;
+                let pathVal = boxedProxy.path_$(path);
+                expect(pathVal.$_value).toBe('prefix.' + path);
+            });
+            
             test(`path_$(${path}, String.prototype.toUpperCase, undefined) === prefix.${path}`, () => {
                 let pathVal = boxedProxy.path_$(path, String.prototype.toUpperCase, undefined);
                 expect(pathVal()).toBe(path.toUpperCase());

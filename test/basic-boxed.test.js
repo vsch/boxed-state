@@ -322,12 +322,105 @@ test('Unboxes boxed values on assignment', () => {
     let boxedProxy;
     let vals;
 
-    vals = createBoxed({oldProp:'abc'});
+    vals = createBoxed({ oldProp: 'abc' });
     origVal = vals.origVal;
     boxedVal = vals.boxedVal;
     boxedProxy = vals.boxedProxy;
-    boxedProxy.newProp = boxedProxy.oldProp; 
+    boxedProxy.newProp = boxedProxy.oldProp;
     const t = boxedProxy.$_value;
-    expect(t).toEqual({oldProp:'abc', newProp:'abc'});
+    expect(t).toEqual({ oldProp: 'abc', newProp: 'abc' });
+});
+
+test('Assigns string values as strings', () => {
+    let origVal;
+    let boxedVal;
+    let boxedProxy;
+    let vals;
+
+    vals = createBoxed({ oldProp: 'abc', newProp: { "en": 'en', ru: 'ru', fr: 'fr', } });
+    origVal = vals.origVal;
+    boxedVal = vals.boxedVal;
+    boxedProxy = vals.boxedProxy;
+    boxedProxy.newProp['a'] = 'string';
+    const t = boxedProxy.newProp.$_value;
+    expect(t).toEqual({ "en": 'en', ru: 'ru', fr: 'fr', a: 'string' });
+});
+
+test('Assigns new array to old string value', () => {
+    let origVal;
+    let boxedVal;
+    let boxedProxy;
+    let vals;
+
+    vals = createBoxed({ oldProp: 'abc' });
+    origVal = vals.origVal;
+    boxedVal = vals.boxedVal;
+    boxedProxy = vals.boxedProxy;
+    boxedProxy.oldProp['a'] = 'string';
+    const t = boxedProxy.oldProp.$_value;
+    expect(t).toEqual({ a: 'string' });
+});
+
+test('Splice boxed-out array', () => {
+    let origVal;
+    let boxedVal;
+    let boxedProxy;
+    let vals;
+
+    vals = createBoxed([1, 2, 3, 4, 5, 6]);
+    origVal = vals.origVal;
+    boxedVal = vals.boxedVal;
+    boxedProxy = vals.boxedProxy;
+
+    boxedProxy.$_.splice(2, 2);
+    const t = boxedProxy.$_modified;
+    expect(t).toEqual([1, 2, 5, 6]);
+});
+
+describe('Append to end of non-object creates array', () => {
+    each([
+        ['undefined', undefined],
+        ['null', null],
+        ['false', false],
+        ['true', true],
+        ['5', 5],
+        ['"5"', "5"],
+        ['[]', []],
+    ])
+        .describe('%s', (text, value) => {
+            test(`_$(${text})._$ = 5 === [5]`, () => {
+                let origVal;
+                let boxedVal;
+                let boxedProxy;
+                let vals;
+
+                vals = createBoxed(value);
+                origVal = vals.origVal;
+                boxedVal = vals.boxedVal;
+                boxedProxy = vals.boxedProxy;
+
+                boxedProxy._$ = 5;
+                const t = boxedProxy.$_modified;
+                expect(t).toEqual([5]);
+            });
+        });
+});
+
+describe('Append to end of object keeps object', () => {
+    test(`_$({})._$ = 5 === {0:5}`, () => {
+        let origVal;
+        let boxedVal;
+        let boxedProxy;
+        let vals;
+
+        vals = createBoxed({});
+        origVal = vals.origVal;
+        boxedVal = vals.boxedVal;
+        boxedProxy = vals.boxedProxy;
+
+        boxedProxy._$ = 5;
+        const t = boxedProxy.$_modified;
+        expect(t).toEqual({0:5});
+    });
 });
 

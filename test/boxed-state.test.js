@@ -5,6 +5,7 @@ const boxedImmutable = require("boxed-immutable");
 const testUtil = require('./testUtil');
 const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
+const boxState = boxedImmutable.boxState;
 
 const isObject = util.isObject;
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
@@ -50,7 +51,7 @@ describe('boxed on demand internal ops', () => {
     test('Boxed does not change', () => {
         expect(boxedVal.boxed).toBe(undefined);
         expect([getCalled, saveCalled]).toEqual([0, 0]);
-        
+
         let boxed = boxedProxy._$;
         expect(boxedVal.boxed).not.toBe(undefined);
         expect([getCalled, saveCalled]).toEqual([1, 0]);
@@ -405,25 +406,30 @@ describe('Boxed On Demand Updates', () => {
     });
 
     test('set cancel', () => {
-        boxedProxy._$.simple = 0;
+        boxedProxy.simple = 0;
         boxedProxy.cancel();
         expect(origVal).toEqual({ state: {} });
     });
 
-    test('chain cancel', () => {
-        boxedProxy._$.simple = 0;
-        let retVal = boxedProxy.cancel();
-        retVal._$.simple = 0;
-        retVal.save();
-        expect(origVal).toEqual({ "deepDelta": { "simple": 0 }, "delta": { "simple": 0 }, "state": { "simple": 0 } });
-    });
-
     test('set value to null', () => {
-        boxedProxy._$.simple = null;
-        let retVal = boxedProxy.cancel();
-        retVal._$.simple = null;
-        retVal.save();
+        boxedProxy.simple = null;
+        boxedProxy.save();
         expect(origVal).toEqual({ "deepDelta": { "simple": null }, "delta": { "simple": null }, "state": { "simple": null } });
     });
+});
+
+test('Boxed cancel of unmodified returns UNDEFINED', () => {
+    const origValue = { oldValue: 'oldValue' };
+    let boxedProxy = boxState(() => origValue);
+    let retVal = boxedProxy.cancel();
+    expect(retVal).toEqual(undefined);
+});
+
+test('Boxed cancel returns delta', () => {
+    const origValue = { oldValue: 'oldValue' };
+    let boxedProxy = boxState(() => origValue);
+    boxedProxy.simple = 0;
+    let retVal = boxedProxy.cancel();
+    expect(retVal).toEqual({ simple: 0 });
 });
 
