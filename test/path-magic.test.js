@@ -57,24 +57,24 @@ describe('Path tests', () => {
                 let pathVal = boxedProxy.path_$(path, (val) => 'prefix.' + val());
                 expect(pathVal.$_value).toBe('prefix.' + path);
             });
-            
+
             test(`path_$(${path})._$ = 'prefix.'+ ${path} === prefix.${path}`, () => {
                 let pathVal = boxedProxy.path_$(path)('prefix.' + path);
                 // let pathVal = boxedProxy.path_$(path);
                 expect(pathVal.$_value).toBe('prefix.' + path);
             });
-            
+
             test(`path_$(${path}).$_value = 'prefix.'+ ${path} === prefix.${path}`, () => {
                 boxedProxy.path_$(path).$_value = 'prefix.' + path;
                 let pathVal = boxedProxy.path_$(path);
                 expect(pathVal.$_value).toBe('prefix.' + path);
             });
-            
+
             test(`path_$(${path}, String.prototype.toUpperCase, undefined) === prefix.${path}`, () => {
                 let pathVal = boxedProxy.path_$(path, String.prototype.toUpperCase, undefined);
                 expect(pathVal()).toBe(path.toUpperCase());
             });
-            
+
             test(`$_path(${path}) === ${path}`, () => {
                 let pathVal = boxedProxy.$_path(path);
                 expect(pathVal).toBe(path);
@@ -84,7 +84,7 @@ describe('Path tests', () => {
                 let pathVal = boxedProxy.$_path(path, (val) => 'prefix.' + val);
                 expect(pathVal).toBe('prefix.' + path);
             });
-            
+
             test(`$_path(${path}, String.prototype.toUpperCase, undefined) === prefix.${path}`, () => {
                 let pathVal = boxedProxy.$_path(path, String.prototype.toUpperCase, undefined);
                 expect(pathVal).toBe(path.toUpperCase());
@@ -92,3 +92,12 @@ describe('Path tests', () => {
         });
 });
 
+test(`$_path(), returning function is not a proxy`, () => {
+    let vals = createBoxed({ func: () => {} });
+    let origVal = vals.origVal;
+    let boxedVal = vals.boxedVal;
+    let boxedProxy = vals.boxedProxy;
+
+    let pathVal = boxedProxy.$_path('func');
+    expect(!!isBoxedProxy(pathVal)).toBe(false);
+});
