@@ -2,6 +2,7 @@
 
 [TOC]: # " "
 
+- [Next: 0.4.2](#next-042)
 - [Next: 0.4.0](#next-040)
 - [0.3.2](#032)
 - [0.3.0](#030)
@@ -18,6 +19,14 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## Next: 0.4.2                   
+
+* Add: `$_array` to always return a boxed-out proxy of an array value, non-array values
+  (including objects) will be wrapped in an array, invalid values return `[]`.
+
+* Add: `$_object` to always return a boxed-out proxy of an object value, if value is an array
+  its own properties will be copied to the object, all others return `{}`.
 
 ## Next: 0.4.0                   
 
