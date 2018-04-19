@@ -100,7 +100,7 @@ function capitalize(value) {
     return util.isString(value) ? value.toUpperCase() : value;
 }
 
-function toArrayIndex(arg) {
+function toArrayIndexOrDefault(arg) {
     const n = Number.parseFloat(arg);
     return Number.isInteger(n) && +n === n && n >= 0 ? n : undefined;
 }
@@ -113,7 +113,7 @@ function toNumberOrUndefined(arg) {
 
 function totalTransform(value, prop, oldValue, getProp, setProp) {
     // total all the values
-    prop = toArrayIndex(prop);
+    prop = toArrayIndexOrDefault(prop);
     if (prop !== undefined) {
         const oldTotal = toNumberOrUndefined(getProp('total'));
         const oldIndices = getProp('totaled');
@@ -404,7 +404,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         const withTotals = [1, 2, 3, 4];
-        boxedProxy.withTotals = util.copyArrayObject(withTotals);
+        boxedProxy.withTotals = util.cloneArrayObject.call(withTotals);
 
         withTotals.total = withTotals.reduce((prev, value) => (prev || 0) + value);
 
@@ -416,7 +416,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         const withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withTotals = util.copyArrayObject(withTotals);
+        boxedProxy.withTotals = util.cloneArrayObject.call(withTotals);
 
         boxedProxy.withTotals._$ = 10.5;
         withTotals.push(10.5);
@@ -431,7 +431,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         const withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withTotals = util.copyArrayObject(withTotals);
+        boxedProxy.withTotals = util.cloneArrayObject.call(withTotals);
 
         delete boxedProxy.withTotals[2];
         delete withTotals[2];
@@ -446,7 +446,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withRounded = util.copyArrayObject(withTotals);
+        boxedProxy.withRounded = util.cloneArrayObject.call(withTotals);
 
         boxedProxy.withRounded._$ = 10.5;
         withTotals.push(10.5);
@@ -462,7 +462,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withRoundedTotals = util.copyArrayObject(withTotals);
+        boxedProxy.withRoundedTotals = util.cloneArrayObject.call(withTotals);
 
         boxedProxy.withRoundedTotals._$ = 10.5;
         withTotals.push(10.5);

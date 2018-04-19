@@ -25,7 +25,7 @@ each([
     [0, '0'],
     [5, '5'],
 ])
-    .describe('testUtil.toTypeString', (value, valueText) => {
+    .describe('util.toTypeString', (value, valueText) => {
         test(`toTypeString(${valueText}) === ${valueText}`, () => {
             expect(toTypeString(value)).toBe(valueText);
         });
@@ -85,8 +85,80 @@ test(`keys .$_`, () => {
     expect(keys).toEqual([]);
 });
 
-test(`mergeDefaultProperties({ obj:{ a: 'a', } }, { obj:{a:'a', b:{}}});`, () => {
-    const result = util.mergeDefaultProperties({ obj: { a: 'a', } }, { obj: { a: 'a', b: {} } }, 99, false);
-    expect(result).toEqual({"obj": {"a": "a", "b": {}}});
+test(`mergeDefaults({ obj:{ a: 'a', } }, { obj:{a:'a', b:{}}});`, () => {
+    const result = util.mergeDefaults.call({ obj: { a: 'a' } }, { obj: { a: 'a', b: {} } });
+    expect(result).toEqual({ "obj": { "a": "a", "b": {} } });
 });
+
+each([
+    [undefined, 'undefined', false],
+    [null, 'null', false],
+    [NaN, 'NaN', false],
+    ["test", '"test"', false],
+    [true, 'true', false],
+    [false, 'false', false],
+    [0, '0', true],
+    [5, '5', true],
+    [-5, '-5', true],
+    [-5.3, '-5', true],
+    ['0', '"0"', true],
+    ['5', '"5"', true],
+    ['5.3', '"5"', true],
+    ['-1', '"-1"', true],
+    ['-5', '"-5"', true],
+    ['-5.3', '"-5.3"', true],
+])
+    .describe('util.isNumeric', (value, valueText, expectedVal) => {
+        test(`isNumeric(${valueText}) === ${expectedVal}`, () => {
+            expect(util.isNumeric(value)).toBe(expectedVal);
+        });
+    });
+
+each([
+    [undefined, 'undefined', undefined],
+    [null, 'null', null],
+    [NaN, 'NaN', NaN],
+    ["test", '"test"', "test"],
+    [true, 'true', true],
+    [false, 'false', false],
+    [0, '0', 0],
+    [5, '5', 5],
+    [-5, '-5', -5],
+    [-5.3, '-5', -5.3],
+    ['0', '"0"', 0],
+    ['5', '"5"', 5],
+    ['5.3', '"5"', 5.3],
+    ['-1', '"-1"', -1],
+    ['-5', '"-5"', -5],
+    ['-5.3', '"-5.3"', -5.3],
+])
+    .describe('util.toNumber', (value, valueText, expectedVal) => {
+        test(`toNumber(${valueText}) === ${expectedVal}`, () => {
+            expect(util.toNumber(value)).toBe(expectedVal);
+        });
+    });
+
+each([
+    [undefined, 'undefined', undefined],
+    [null, 'null', null],
+    [NaN, 'NaN', NaN],
+    ["test", '"test"', "test"],
+    [true, 'true', true],
+    [false, 'false', false],
+    [0, '0', 0],
+    [5, '5', 5],
+    [-5, '-5', -5],
+    [-5.3, '-5', -5.3],
+    ['0', '"0"', 0],
+    ['5', '"5"', 5],
+    ['5.3', '"5"', 5.3],
+    ['-1', '"-1"', -1],
+    ['-5', '"-5"', -5],
+    ['-5.3', '"-5.3"', -5.3],
+])
+    .describe('util.toNumber', (value, valueText, expectedVal) => {
+        test(`toNumber(${valueText}) === ${expectedVal}`, () => {
+            expect(util.toNumber(value)).toBe(expectedVal);
+        });
+    });
 

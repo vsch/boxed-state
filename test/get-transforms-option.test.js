@@ -27,7 +27,7 @@ function capitalize(value) {
     return util.isString(value) ? value.toUpperCase() : value;
 }
 
-function toArrayIndex(arg) {
+function toArrayIndexOrDefault(arg) {
     const n = Number.parseFloat(arg);
     return Number.isInteger(n) && +n === n && n >= 0 ? n : undefined;
 }
@@ -40,7 +40,7 @@ function toNumberOrUndefined(arg) {
 
 function totalTransform(value, prop, oldValue, getProp, setProp) {
     // total all the values
-    prop = toArrayIndex(prop);
+    prop = toArrayIndexOrDefault(prop);
     if (prop !== undefined) {
         const oldTotal = toNumberOrUndefined(getProp('total'));
         const oldIndices = getProp('totaled');

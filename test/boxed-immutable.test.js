@@ -119,7 +119,7 @@ each([
             origVal = vals.origVal;
             boxedVal = vals.boxedVal;
             boxedProxy = vals.boxedProxy;
-            expected = util.isObject(origVal) && util.isArray(origVal) ? util.copyArrayObject(origVal) : Object.assign({}, origVal);
+            expected = util.isObject(origVal) && util.isArray(origVal) ? util.cloneArrayObject.call(origVal) : Object.assign({}, origVal);
             delta = util.isObject(origVal) && util.isArray(origVal) ? [] : {};
 
             for (let param in params) {
@@ -219,7 +219,7 @@ each([
             origVal = vals.origVal;
             boxedVal = vals.boxedVal;
             boxedProxy = vals.boxedProxy;
-            expected = util.isObject(origVal) && util.isArray(origVal) ? util.copyArrayObject(origVal) : Object.assign({}, origVal);
+            expected = util.isObject(origVal) && util.isArray(origVal) ? util.cloneArrayObject.call(origVal) : Object.assign({}, origVal);
             delta = util.isObject(origVal) && util.isArray(origVal) ? [] : {};
 
             for (let param in params) {
