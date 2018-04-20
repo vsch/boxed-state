@@ -5,7 +5,7 @@ const testUtil = require('./testUtil');
 const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
 
-const isObject = util.isObject;
+const isObjectLike = util.isObjectLike;
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
@@ -14,6 +14,8 @@ const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createBoxedState;
 const toTypeString = testUtil.toTypeString;
+const array = testUtil.array;
+const object = testUtil.object;
 
 each([
     [undefined, 'undefined'],
@@ -70,11 +72,11 @@ each([
             expect(!!box).toBe(false);
         });
 
-        test(`isBoxedOutProxy(${'_$('}${toTypeString(value)}).$_) === ${toTypeString(isObject(value))}`, () => {
+        test(`isBoxedOutProxy(${'_$('}${toTypeString(value)}).$_) === ${toTypeString(isObjectLike(value))}`, () => {
             const target = _$(value);
             const proxy = target.$_;
             const box = isBoxedOutProxy(proxy);
-            expect(!!box).toBe(!!isObject(value));
+            expect(!!box).toBe(!!isObjectLike(value));
         });
     });
 
@@ -161,4 +163,75 @@ each([
             expect(util.toNumber(value)).toBe(expectedVal);
         });
     });
+
+each([
+    [undefined, 'undefined', undefined],
+    [null, 'null', null],
+    [NaN, 'NaN', NaN],
+    ["test", '"test"', "test"],
+    [true, 'true', true],
+    [false, 'false', false],
+    [0, '0', 0],
+    [5, '5', 5],
+    [-5, '-5', -5],
+    [-5.3, '-5', -5.3],
+    ['0', '"0"', 0],
+    ['5', '"5"', 5],
+    ['5.3', '"5"', 5.3],
+    ['-1', '"-1"', -1],
+    ['-5', '"-5"', -5],
+    ['-5.3', '"-5.3"', -5.3],
+])
+    .describe('util.hasOwnProperties', (value, valueText, expectedVal) => {
+        test(`util.hasOwnProperties.call(${valueText}) === false`, () => {
+            expect(util.hasOwnProperties.call(value)).toBe(false);
+        });
+    });
+
+each([
+    array([]),
+    object({}),
+])
+    .describe('util.hasOwnProperties', (valueText, testValue) => {
+        test(`util.hasOwnProperties.call(${valueText}) === false`, () => {
+            expect(util.hasOwnProperties.call(testValue)).toBe(false);
+        });
+    });
+
+each([
+    array([1]),
+    object([1]),
+])
+    .describe('util.hasOwnProperties', (valueText, testValue) => {
+        test(`util.hasOwnProperties.call(${valueText}) === true`, () => {
+            expect(util.hasOwnProperties.call(testValue)).toBe(true);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, '0') === false`, () => {
+            expect(util.hasOwnProperties.call(testValue, '0')).toBe(false);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, ['0']) === false`, () => {
+            expect(util.hasOwnProperties.call(testValue, ['0'])).toBe(false);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, {'0': ''}) === false`, () => {
+            expect(util.hasOwnProperties.call(testValue, { '0': '' })).toBe(false);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, (value,key)=>key === 0) === false`, () => {
+            expect(util.hasOwnProperties.call(testValue, (value, key) => key === 0)).toBe(false);
+        });
+
+        // wrong prop not excluded
+        test(`util.hasOwnProperties.call(${valueText}, '1') === true`, () => {
+            expect(util.hasOwnProperties.call(testValue, '1')).toBe(true);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, ['1']) === true`, () => {
+            expect(util.hasOwnProperties.call(testValue, ['1'])).toBe(true);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, {'1': ''}) === true`, () => {
+            expect(util.hasOwnProperties.call(testValue, { '1': '' })).toBe(true);
+        });
+        test(`util.hasOwnProperties.call(${valueText}, (value,key)=>key === 1) === true`, () => {
+            expect(util.hasOwnProperties.call(testValue, (value, key) => key === 1)).toBe(true);
+        });
+    });
+
 

@@ -6,7 +6,7 @@ const testUtil = require('./testUtil');
 const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
 
-const isObject = util.isObject;
+const isObjectLike = util.isObjectLike;
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;

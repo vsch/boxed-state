@@ -6,7 +6,7 @@ const testUtil = require('./testUtil');
 const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
 
-const isObject = util.isObject;
+const isObjectLike = util.isObjectLike;
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
@@ -53,7 +53,7 @@ describe('$_object tests', () => {
         });
 });
 
-test('boxOut().filtered() returns object with filtered properties', () => {
+test('boxOut().filteredProps() returns object with filtered properties', () => {
     const origVal = {
         0: '0',
         1: '1',
@@ -67,7 +67,7 @@ test('boxOut().filtered() returns object with filtered properties', () => {
     };
 
     const boxedOut = util.boxOut(origVal);
-    const result = boxedOut.filtered((key, value) => key !== 'filteredOut' && key !== '1');
+    const result = boxedOut.filteredProps((key, value) => key !== 'filteredOut' && key !== '1');
     expect(result).toEqual(expectedVal);
 
 });
@@ -91,7 +91,7 @@ test('boxOut().filter() returns object with filtered properties', () => {
 
 });
 
-test('boxOut().mapped() returns object with mapped properties', () => {
+test('boxOut().mappedProps() returns object with mapped properties', () => {
     const origVal = {
         0: '0',
         1: '1',
@@ -107,7 +107,7 @@ test('boxOut().mapped() returns object with mapped properties', () => {
     };
 
     const boxedOut = util.boxOut(origVal);
-    const result = boxedOut.mapped((key, value) => util.isArrayIndex(key) && util.isNumeric(value) ? util.toNumber(value) + 2 : value);
+    const result = boxedOut.mappedProps((key, value) => util.isArrayIndex(key) && util.isNumeric(value) ? util.toNumber(value) + 2 : value);
     expect(result).toEqual(expectedVal);
 });
 

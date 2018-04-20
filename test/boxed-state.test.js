@@ -7,7 +7,7 @@ const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
 const boxState = boxedImmutable.boxState;
 
-const isObject = util.isObject;
+const isObjectLike = util.isObjectLike;
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;

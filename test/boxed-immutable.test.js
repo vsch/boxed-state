@@ -4,8 +4,9 @@ const boxedImmutable = require("boxed-immutable");
 const testUtil = require('./testUtil');
 const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
+const $_ = util.boxOut;
 
-const isObject = util.isObject;
+const isObjectLike = util.isObjectLike;
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
@@ -48,7 +49,7 @@ each([
 
         test('$_ === boxedOutProxy or value', () => {
             const $_boxedOut = boxedProxy.$_;
-            expect($_boxedOut).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+            expect($_boxedOut).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
         });
 
         test('$_value === value', () => {
@@ -119,8 +120,8 @@ each([
             origVal = vals.origVal;
             boxedVal = vals.boxedVal;
             boxedProxy = vals.boxedProxy;
-            expected = util.isObject(origVal) && util.isArray(origVal) ? util.cloneArrayObject.call(origVal) : Object.assign({}, origVal);
-            delta = util.isObject(origVal) && util.isArray(origVal) ? [] : {};
+            expected = util.isObjectLike(origVal) && util.isArray(origVal) ? util.cloneArrayObject.call(origVal) : Object.assign({}, origVal);
+            delta = util.isObjectLike(origVal) && util.isArray(origVal) ? [] : {};
 
             for (let param in params) {
                 if (params.hasOwnProperty(param)) {
@@ -165,7 +166,7 @@ each([
 
         test('$_ === boxedOutProxy or value', () => {
             const $_boxedOut = boxedProxy.$_;
-            expect($_boxedOut).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+            expect($_boxedOut).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
         });
 
         test('$_value === value', () => {
@@ -219,8 +220,8 @@ each([
             origVal = vals.origVal;
             boxedVal = vals.boxedVal;
             boxedProxy = vals.boxedProxy;
-            expected = util.isObject(origVal) && util.isArray(origVal) ? util.cloneArrayObject.call(origVal) : Object.assign({}, origVal);
-            delta = util.isObject(origVal) && util.isArray(origVal) ? [] : {};
+            expected = util.isObjectLike(origVal) && util.isArray(origVal) ? util.cloneArrayObject.call(origVal) : Object.assign({}, origVal);
+            delta = util.isObjectLike(origVal) && util.isArray(origVal) ? [] : {};
 
             for (let param in params) {
                 if (params.hasOwnProperty(param)) {
@@ -244,7 +245,7 @@ each([
         });
 
         test('$_ === boxedOutProxy or value', () => {
-            expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+            expect(boxedProxy.$_).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
         });
 
         test('$_value === value', () => {
@@ -310,7 +311,7 @@ describe('Boxed Non-Empty Multi-Mods One Copy', () => {
     });
 
     test('$_ === boxedOutProxy or value', () => {
-        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        expect(boxedProxy.$_).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
     });
 
     test('$_value === value', () => {
@@ -376,7 +377,7 @@ describe('Boxed Non Empty Array Modified with property', () => {
     });
 
     test('$_ === boxedOutProxy or value', () => {
-        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        expect(boxedProxy.$_).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
     });
 
     test('$_value === value', () => {
@@ -540,7 +541,7 @@ describe('Boxed Deep Nested New Mods', () => {
     });
 
     test('$_ === boxedOutProxy or value', () => {
-        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        expect(boxedProxy.$_).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
     });
 
     test('$_value === value', () => {
@@ -711,7 +712,7 @@ describe('Boxed Deep Nested delta Mods', () => {
     });
 
     test('$_ === boxedOutProxy or value', () => {
-        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        expect(boxedProxy.$_).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
     });
 
     test('$_value === value', () => {
@@ -874,7 +875,7 @@ describe('Boxed Deep Nested deepDelta Mods', () => {
     });
 
     test('$_ === boxedOutProxy or value', () => {
-        expect(boxedProxy.$_).toBe(isObject(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
+        expect(boxedProxy.$_).toBe(isObjectLike(boxedVal.value) ? boxedVal.boxedOutProxy : boxedVal.value);
     });
 
     test('$_value === value', () => {
