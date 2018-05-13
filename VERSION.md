@@ -2,6 +2,8 @@
 
 [TOC]: # " "
 
+- [0.7.0](#070)
+- [0.6.0](#060)
 - [0.5.8](#058)
 - [0.5.6](#056)
 - [0.5.4](#054)
@@ -25,6 +27,21 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## 0.7.0
+
+* Change: move `boxed-out` implementation to own module `boxed-out`.
+* Add: `canBox` function(value) property to box context if return tests `true` then value will
+  not be boxed and assumed to handle its own immutability and change tracking. This allows
+  references whose properties are not copied.
+* Remove: exports from dependent modules
+* Rename: util to boxed-out and export a single function
+* Change: tests to use dependent modules
+
+## 0.6.0
+
+* Change: factor out object each, filter, map, etc into own module: `obj-each-break`
+* Change: `eachRev` to `eachRight` for orthogonality to forEach, map, filter from `for-each-break`
 
 ## 0.5.8
 

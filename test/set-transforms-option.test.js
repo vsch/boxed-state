@@ -1,23 +1,47 @@
 "use strict";
 
-const each = require('jest-each');
+const jestEach = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
+const utilTypeFuncs = require('util-type-funcs');
+const objEachBreak = require('obj-each-break');
 const testUtil = require('./testUtil');
-const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
+const boxOut = boxedImmutable.boxOut;
+const $_ = boxedImmutable.boxOut;
+const boxState = boxedImmutable.boxState;
 
-const isObjectLike = util.isObjectLike;
+const isObjectLike = utilTypeFuncs.isObjectLike;
+const isNullOrUndefined = utilTypeFuncs.isNullOrUndefined;
+const isArray = utilTypeFuncs.isArray;
+const toArrayIndex = utilTypeFuncs.toArrayIndex;
+const isArrayIndex = utilTypeFuncs.isArrayIndex;
+const isValid = utilTypeFuncs.isValid;
+const isFunction = utilTypeFuncs.isFunction;
+const isString = utilTypeFuncs.isString;
+const isNumeric = utilTypeFuncs.isNumeric;
+const toNumber = utilTypeFuncs.toNumber;
+
+const BREAK = objEachBreak.BREAK;
+const cloneArrayObject = objEachBreak.cloneArrayObject;
+const hasOwnProperties = objEachBreak.hasOwnProperties;
+
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
+const createTransformedBoxed = testUtil.createTransformedBoxed;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
-const createTransformedBoxed = testUtil.createTransformedBoxed;
 const createOnDemandBoxed = testUtil.createBoxedState;
-const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
 const toTypeString = testUtil.toTypeString;
+const stringify = testUtil.stringify;
 const createBoxedState = testUtil.createBoxedState;
+const array = testUtil.array;
+const object = testUtil.object;
+
+
+const utilStringWrap = require('util-string-wrap');
+const endsWith = utilStringWrap.endsWith;
 
 function booleanTransform(value) {
     return !!value;
@@ -32,7 +56,7 @@ function valueTypeTransform(value, setOfTypes, defaultValue) {
 }
 
 describe('inSetTransform', () => {
-    each([
+    jestEach([
         ['in set', { value: 'c', setOf: ['a', 'b', 'c', 0,], defaultValue: undefined, expected: 'c' }],
         ['number not string', { value: '0', setOf: ['a', 'b', 'c', 0,], defaultValue: undefined, expected: 'a' }],
         ['default provided', { value: '0', setOf: ['a', 'b', 'c', 0,], defaultValue: null, expected: null }],
@@ -45,7 +69,7 @@ describe('inSetTransform', () => {
 });
 
 describe('inSetTransform(toNumber())', () => {
-    each([
+    jestEach([
         ['in set', { value: 'c', setOf: ['a', 'b', 'c', 0,], defaultValue: undefined, expected: 'c' }],
         ['number not string', { value: '0', setOf: ['a', 'b', 'c', 0,], defaultValue: undefined, expected: 0 }],
         ['default provided', { value: '0', setOf: ['a', 'b', 'c', 0,], defaultValue: null, expected: 0 }],
@@ -64,13 +88,13 @@ describe('inSetTransform(toNumber())', () => {
             // });
 
             test(`inSetTransform(toNumber(${toTypeString(t.value)})) === ${toTypeString(t.expected)}`, () => {
-                expect(inSetTransform(util.toNumber(t.value), t.setOf, t.defaultValue)).toEqual(t.expected);
+                expect(inSetTransform(toNumber(t.value), t.setOf, t.defaultValue)).toEqual(t.expected);
             });
         });
 });
 
 describe('valueTypeTransform()', () => {
-    each([
+    jestEach([
         ['in set', { value: 'c', setOf: ['string', 'number'], defaultValue: undefined, expected: 'c' }],
         ['number not string', { value: '0', setOf: ['string', 'number'], defaultValue: undefined, expected: '0' }],
         ['default provided', { value: '0', setOf: ['string', 'number'], defaultValue: null, expected: '0' }],
@@ -97,7 +121,7 @@ describe('valueTypeTransform()', () => {
 });
 
 function capitalize(value) {
-    return util.isString(value) ? value.toUpperCase() : value;
+    return isString(value) ? value.toUpperCase() : value;
 }
 
 function toArrayIndexOrDefault(arg) {
@@ -252,10 +276,10 @@ describe('setTransforms applied to props', () => {
 
         let oldValue = boxedProxy.boolean();
         expect(oldValue).toEqual(oldValue === true);
-        
+
         delete boxedProxy.boolean;
         let value = boxedProxy.boolean();
-        
+
         expect(value).toBe(false);
     });
 
@@ -263,7 +287,7 @@ describe('setTransforms applied to props', () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, };
         const vals = createTransformedBoxed({ setTransforms: {'': function (value, prop, oldValue, getProp, setProp) {
-                    if (util.endsWith(prop,'Flag')) {
+                    if (endsWith(prop,'Flag')) {
                         return !!value;
                     }
                     return value;
@@ -278,7 +302,7 @@ describe('setTransforms applied to props', () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, };
         const vals = createTransformedBoxed({ setTransforms: {'_$': function (value, prop, oldValue, getProp, setProp) {
-                    if (util.endsWith(prop,'Flag')) {
+                    if (endsWith(prop,'Flag')) {
                         return !!value;
                     }
                     return value;
@@ -295,7 +319,7 @@ describe('setTransforms applied to props', () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, newFlag:true };
         const vals = createTransformedBoxed({ setTransforms: {'_$': function (value, prop, oldValue, getProp, setProp) {
-                    if (util.endsWith(prop,'Flag')) {
+                    if (endsWith(prop,'Flag')) {
                         return !!value;
                     }
                     return value;
@@ -303,7 +327,7 @@ describe('setTransforms applied to props', () => {
         const { origVal, boxedVal, boxedProxy } = vals;
 
         boxedProxy.newFlag = [];
-        
+
         // expect(boxedVal.value.withTotals.total).toEqual(withTotals.total);
         expect(boxedVal.valueOf()).toEqual(Object.assign({}, withTotals, {newFlag:true}));
     });
@@ -312,7 +336,7 @@ describe('setTransforms applied to props', () => {
         const withTotals = { showFlag: null, collapseFlag: 0, untouched: '', isLoadingFlag: 1, };
         const expected = { showFlag: false, collapseFlag: false, untouched: '', isLoadingFlag: true, newFlag:true };
         const vals = createTransformedBoxed({ setTransforms: {'_$': function (value, prop, oldValue, getProp, setProp) {
-                    if (util.endsWith(prop,'Flag')) {
+                    if (endsWith(prop,'Flag')) {
                         return !!value;
                     }
                     return value;
@@ -321,7 +345,7 @@ describe('setTransforms applied to props', () => {
 
         boxedVal.setValueOf(withTotals);
         boxedProxy.newFlag = [];
-        
+
         // expect(boxedVal.value.withTotals.total).toEqual(withTotals.total);
         expect(boxedVal.valueOf()).toEqual(expected);
     });
@@ -399,12 +423,12 @@ describe('setTransforms applied to props', () => {
         // expect(boxedVal.value.withTotals.total).toEqual(withTotals.total);
         expect(testUtil.arrayToObject(boxedVal.valueOfModified().withRoundedTotals, ['totaled'])).toEqual(testUtil.arrayToObject(withTotals));
     });
-    
+
     test(`with object totals`, () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         const withTotals = [1, 2, 3, 4];
-        boxedProxy.withTotals = util.cloneArrayObject.call(withTotals);
+        boxedProxy.withTotals = cloneArrayObject.call(withTotals);
 
         withTotals.total = withTotals.reduce((prev, value) => (prev || 0) + value);
 
@@ -416,7 +440,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         const withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withTotals = util.cloneArrayObject.call(withTotals);
+        boxedProxy.withTotals = cloneArrayObject.call(withTotals);
 
         boxedProxy.withTotals._$ = 10.5;
         withTotals.push(10.5);
@@ -431,7 +455,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         const withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withTotals = util.cloneArrayObject.call(withTotals);
+        boxedProxy.withTotals = cloneArrayObject.call(withTotals);
 
         delete boxedProxy.withTotals[2];
         delete withTotals[2];
@@ -446,7 +470,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withRounded = util.cloneArrayObject.call(withTotals);
+        boxedProxy.withRounded = cloneArrayObject.call(withTotals);
 
         boxedProxy.withRounded._$ = 10.5;
         withTotals.push(10.5);
@@ -462,7 +486,7 @@ describe('setTransforms applied to props', () => {
         const vals = createTransformedBox({});
         const { origVal, boxedVal, boxedProxy } = vals;
         let withTotals = [1.5, 2.5, 3.5, 4.5];
-        boxedProxy.withRoundedTotals = util.cloneArrayObject.call(withTotals);
+        boxedProxy.withRoundedTotals = cloneArrayObject.call(withTotals);
 
         boxedProxy.withRoundedTotals._$ = 10.5;
         withTotals.push(10.5);

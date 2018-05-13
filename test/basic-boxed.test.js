@@ -1,21 +1,43 @@
 "use strict";
 
-const each = require('jest-each');
+const jestEach = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
+const utilTypeFuncs = require('util-type-funcs');
+const objEachBreak = require('obj-each-break');
 const testUtil = require('./testUtil');
-const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
+const boxOut = boxedImmutable.boxOut;
+const $_ = boxedImmutable.boxOut;
+const boxState = boxedImmutable.boxState;
 
-const isObjectLike = util.isObjectLike;
+const isObjectLike = utilTypeFuncs.isObjectLike;
+const isNullOrUndefined = utilTypeFuncs.isNullOrUndefined;
+const isArray = utilTypeFuncs.isArray;
+const toArrayIndex = utilTypeFuncs.toArrayIndex;
+const isArrayIndex = utilTypeFuncs.isArrayIndex;
+const isValid = utilTypeFuncs.isValid;
+const isFunction = utilTypeFuncs.isFunction;
+const isString = utilTypeFuncs.isString;
+const isNumeric = utilTypeFuncs.isNumeric;
+const toNumber = utilTypeFuncs.toNumber;
+
+const BREAK = objEachBreak.BREAK;
+const cloneArrayObject = objEachBreak.cloneArrayObject;
+const hasOwnProperties = objEachBreak.hasOwnProperties;
+
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
+const createTransformedBoxed = testUtil.createTransformedBoxed;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createBoxedState;
-const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
 const toTypeString = testUtil.toTypeString;
+const stringify = testUtil.stringify;
+const createBoxedState = testUtil.createBoxedState;
+const array = testUtil.array;
+const object = testUtil.object;
 
 describe('Boxing of simple values', () => {
     const template = {
@@ -30,7 +52,7 @@ describe('Boxing of simple values', () => {
 
     const params = generateTestParams(template, (t) => `_$(${t.valueText})`);
 
-    each(params)
+    jestEach(params)
         .describe('%s', (testDescription, thisTest) => {
             let origVal;
             let boxedVal;
@@ -102,15 +124,15 @@ describe('Boxing of simple values', () => {
                 expect(result === undefined ? 'undefined' : result).toEqual(boxedVal.value !== undefined ? expected : 'undefined');
             });
 
-            test(`.$_ifValid called === ${util.isValid(thisTest.value)}`, () => {
+            test(`.$_ifValid called === ${isValid(thisTest.value)}`, () => {
                 let called = false;
                 boxedProxy.$_ifValid(value => called = true);
-                expect(called).toBe(!!util.isValid(boxedVal.value));
+                expect(called).toBe(!!isValid(boxedVal.value));
             });
 
             test(`.$_ifValid(value => {}) called with value == ${thisTest.value}`, () => {
                 let calledValue;
-                if (util.isValid(boxedVal.value)) {
+                if (isValid(boxedVal.value)) {
                     boxedProxy.$_ifValid(value => calledValue = value);
                     expect(calledValue).toEqual(boxedVal.value);
                 }
@@ -119,18 +141,18 @@ describe('Boxing of simple values', () => {
             test(`.$_ifValid(value => {}) returns result`, () => {
                 const expected = false;
                 let result = boxedProxy.$_ifValid(value => expected);
-                expect(result === undefined ? 'undefined' : result).toEqual(util.isValid(boxedVal.value) ? expected : 'undefined');
+                expect(result === undefined ? 'undefined' : result).toEqual(isValid(boxedVal.value) ? expected : 'undefined');
             });
 
-            test(`.$_ifArray called === ${util.isArray(thisTest.value)}`, () => {
+            test(`.$_ifArray called === ${isArray(thisTest.value)}`, () => {
                 let called = false;
                 boxedProxy.$_ifArray(value => called = true);
-                expect(called).toBe(!!util.isArray(boxedVal.value));
+                expect(called).toBe(!!isArray(boxedVal.value));
             });
 
             test(`.$_ifArray(value => {}) called with value == ${thisTest.value}`, () => {
                 let calledValue;
-                if (util.isArray(boxedVal.value)) {
+                if (isArray(boxedVal.value)) {
                     boxedProxy.$_ifArray(value => calledValue = value);
                     expect(calledValue).toEqual(boxedVal.value);
                 }
@@ -139,18 +161,18 @@ describe('Boxing of simple values', () => {
             test(`.$_ifArray(value => {}) returns result`, () => {
                 const expected = false;
                 let result = boxedProxy.$_ifArray(value => expected);
-                expect(result === undefined ? 'undefined' : result).toEqual(util.isArray(boxedVal.value) ? expected : 'undefined');
+                expect(result === undefined ? 'undefined' : result).toEqual(isArray(boxedVal.value) ? expected : 'undefined');
             });
 
-            test(`.$_ifObject called === ${util.isObjectLike(thisTest.value)}`, () => {
+            test(`.$_ifObject called === ${isObjectLike(thisTest.value)}`, () => {
                 let called = false;
                 boxedProxy.$_ifObject(value => called = true);
-                expect(called).toBe(!!util.isObjectLike(boxedVal.value));
+                expect(called).toBe(!!isObjectLike(boxedVal.value));
             });
 
             test(`.$_ifObject(value => {}) called with value == ${thisTest.value}`, () => {
                 let calledValue;
-                if (util.isObjectLike(boxedVal.value)) {
+                if (isObjectLike(boxedVal.value)) {
                     boxedProxy.$_ifObject(value => calledValue = value);
                     expect(calledValue).toEqual(boxedVal.value);
                 }
@@ -159,7 +181,7 @@ describe('Boxing of simple values', () => {
             test(`.$_ifObject(value => {}) returns result`, () => {
                 const expected = false;
                 let result = boxedProxy.$_ifObject(value => expected);
-                expect(result === undefined ? 'undefined' : result).toEqual(util.isObjectLike(boxedVal.value) ? expected : 'undefined');
+                expect(result === undefined ? 'undefined' : result).toEqual(isObjectLike(boxedVal.value) ? expected : 'undefined');
             });
 
             test(`.if_$ called === ${!!thisTest.value}`, () => {
@@ -204,15 +226,15 @@ describe('Boxing of simple values', () => {
                 expect(result === undefined ? 'undefined' : result).toEqual(boxedVal.value !== undefined ? expected : 'undefined');
             });
 
-            test(`.ifValid_$ called === ${util.isValid(thisTest.value)}`, () => {
+            test(`.ifValid_$ called === ${isValid(thisTest.value)}`, () => {
                 let called = false;
                 boxedProxy.ifValid_$(value => called = true);
-                expect(called).toBe(!!util.isValid(boxedVal.value));
+                expect(called).toBe(!!isValid(boxedVal.value));
             });
 
             test(`.ifValid_$(value => {}) called with boxed value == ${thisTest.value}`, () => {
                 let calledValue;
-                if (util.isValid(boxedVal.value)) {
+                if (isValid(boxedVal.value)) {
                     boxedProxy.ifValid_$(value => calledValue = value);
                     expect(!!isBoxedInProxy(calledValue)).toEqual(true);
                     expect(calledValue()).toEqual(boxedVal.value);
@@ -222,18 +244,18 @@ describe('Boxing of simple values', () => {
             test(`.ifValid_$(value => {}) returns result`, () => {
                 const expected = false;
                 let result = boxedProxy.ifValid_$(value => expected);
-                expect(result === undefined ? 'undefined' : result).toEqual(util.isValid(boxedVal.value) ? expected : 'undefined');
+                expect(result === undefined ? 'undefined' : result).toEqual(isValid(boxedVal.value) ? expected : 'undefined');
             });
 
-            test(`.ifArray_$ called === ${util.isArray(thisTest.value)}`, () => {
+            test(`.ifArray_$ called === ${isArray(thisTest.value)}`, () => {
                 let called = false;
                 boxedProxy.ifArray_$(value => called = true);
-                expect(called).toBe(!!util.isArray(boxedVal.value));
+                expect(called).toBe(!!isArray(boxedVal.value));
             });
 
             test(`.ifArray_$(value => {}) called with boxed value == ${thisTest.value}`, () => {
                 let calledValue;
-                if (util.isArray(boxedVal.value)) {
+                if (isArray(boxedVal.value)) {
                     boxedProxy.ifArray_$(value => calledValue = value);
                     expect(!!isBoxedInProxy(calledValue)).toEqual(true);
                     expect(calledValue()).toEqual(boxedVal.value);
@@ -243,18 +265,18 @@ describe('Boxing of simple values', () => {
             test(`.ifArray_$(value => {}) returns result`, () => {
                 const expected = false;
                 let result = boxedProxy.ifArray_$(value => expected);
-                expect(result === undefined ? 'undefined' : result).toEqual(util.isArray(boxedVal.value) ? expected : 'undefined');
+                expect(result === undefined ? 'undefined' : result).toEqual(isArray(boxedVal.value) ? expected : 'undefined');
             });
 
-            test(`.ifObject_$ called === ${util.isObjectLike(thisTest.value)}`, () => {
+            test(`.ifObject_$ called === ${isObjectLike(thisTest.value)}`, () => {
                 let called = false;
                 boxedProxy.ifObject_$(value => called = true);
-                expect(called).toBe(!!util.isObjectLike(boxedVal.value));
+                expect(called).toBe(!!isObjectLike(boxedVal.value));
             });
 
             test(`.ifObject_$(value => {}) called with boxed value == ${thisTest.value}`, () => {
                 let calledValue;
-                if (util.isObjectLike(boxedVal.value)) {
+                if (isObjectLike(boxedVal.value)) {
                     boxedProxy.ifObject_$(value => calledValue = value);
                     expect(!!isBoxedInProxy(calledValue)).toEqual(true);
                     expect(calledValue()).toEqual(boxedVal.value);
@@ -264,7 +286,7 @@ describe('Boxing of simple values', () => {
             test(`.ifObject_$(value => {}) returns result`, () => {
                 const expected = false;
                 let result = boxedProxy.ifObject_$(value => expected);
-                expect(result === undefined ? 'undefined' : result).toEqual(util.isObjectLike(boxedVal.value) ? expected : 'undefined');
+                expect(result === undefined ? 'undefined' : result).toEqual(isObjectLike(boxedVal.value) ? expected : 'undefined');
             });
 
             describe('Boxed proxy access', () => {
@@ -285,10 +307,10 @@ describe('Boxing of simple values', () => {
                     //     let origKeys = Object.getOwnPropertyDescriptor(origVal,'length');
                     //     let proxyKeys = Object.getOwnPropertyDescriptor(boxedProxy,'length');
                     // }
-                    expect(Object.keys(boxedProxy)).toEqual(util.isObjectLike(origVal) || util.isFunction(origVal) ? Object.keys(origVal) : []);
+                    expect(Object.keys(boxedProxy)).toEqual(isObjectLike(origVal) || isFunction(origVal) ? Object.keys(origVal) : []);
                 });
 
-                each(nestedParams)
+                jestEach(nestedParams)
                     .describe(`%s`, (nestedDescription, nestedTest) => {
                         test(`${nestedTest.genTitle('.$_ is ' + (JSON.stringify(paramStringException(thisTest.value, nestedTest.value)) || 'undefined'))}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value];
@@ -378,7 +400,7 @@ test('Splice boxed-out array', () => {
 });
 
 describe('Append to end of non-object creates array', () => {
-    each([
+    jestEach([
         ['undefined', undefined],
         ['null', null],
         ['false', false],

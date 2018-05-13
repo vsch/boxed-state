@@ -1,12 +1,15 @@
+"use strict";
+
 const boxedImmutable = require("boxed-immutable");
 const _$ = boxedImmutable._$;
 const createBox = boxedImmutable.createBox;
 const Boxed = boxedImmutable.boxed.Box;
 const BOXED_GET_THIS = boxedImmutable.boxed.BOXED_GET_THIS;
-const isProxy = boxedImmutable.boxed.isBoxedProxy;
-const boxedThis = boxedImmutable.boxed.thisBox;
 const boxState = boxedImmutable.boxed.boxState;
-const util = boxedImmutable.util;
+const utilTypeFuncs = require('util-type-funcs');
+const isObjectLike = utilTypeFuncs.isObjectLike;
+const isArray = utilTypeFuncs.isArray;
+const isArrayIndex = utilTypeFuncs.isArrayIndex;
 
 function generateTestParams(template, customize) {
     const innerParams = [];
@@ -45,7 +48,7 @@ function paramStringException(arg, param) {
     // const paramIsNumeric = util.isNumericInteger(param);
     // return valueIsString && paramIsNumeric ? arg[param] : undefined;
     // if (valueIsString) undefined;
-    return util.isObjectLike(arg) ? arg[param] : undefined;
+    return isObjectLike(arg) ? arg[param] : undefined;
 }
 
 function createBoxed(val, box) {
@@ -96,7 +99,7 @@ function arrayToObject(arr, except) {
 }
 
 function stringify(arg) {
-    if (util.isArray(arg)) {
+    if (isArray(arg)) {
         // if it has own props other than indices then we need to stringify them separately
         const keys = Object.keys(arg);
         const iMax = keys.length;
@@ -105,7 +108,7 @@ function stringify(arg) {
         for (let i = 0; i < iMax; i++) {
             text += sep;
             sep = ", ";
-            if (util.isArrayIndex(keys[i])) {
+            if (isArrayIndex(keys[i])) {
                 text += stringify(arg[keys[i]]);
             } else {
                 text += stringify(keys[i]);
@@ -115,7 +118,7 @@ function stringify(arg) {
         }
         text += "]";
         return text;
-    } else if (util.isObjectLike(arg)) {
+    } else if (isObjectLike(arg)) {
         // if it has own props other than indices then we need to stringify them separately
         const keys = Object.keys(arg);
         const iMax = keys.length;
@@ -149,9 +152,9 @@ function array(arr, props) {
 }
 
 function object(arr, props) {
-    const obj = !util.isArray(arr) ? Object.assign({}, arr) : {};
+    const obj = !isArray(arr) ? Object.assign({}, arr) : {};
 
-    if (util.isArray(arr)) {
+    if (isArray(arr)) {
         let iMax = arr.length;
         for (let i = 0; i < iMax; i++) {
             obj[i] = arr[i];

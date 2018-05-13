@@ -1,21 +1,43 @@
 "use strict";
 
-const each = require('jest-each');
+const jestEach = require('jest-each');
 const boxedImmutable = require("boxed-immutable");
+const utilTypeFuncs = require('util-type-funcs');
+const objEachBreak = require('obj-each-break');
 const testUtil = require('./testUtil');
-const util = boxedImmutable.util;
 const _$ = boxedImmutable._$;
+const boxOut = boxedImmutable.boxOut;
+const $_ = boxedImmutable.boxOut;
+const boxState = boxedImmutable.boxState;
 
-const isObjectLike = util.isObjectLike;
+const isObjectLike = utilTypeFuncs.isObjectLike;
+const isNullOrUndefined = utilTypeFuncs.isNullOrUndefined;
+const isArray = utilTypeFuncs.isArray;
+const toArrayIndex = utilTypeFuncs.toArrayIndex;
+const isArrayIndex = utilTypeFuncs.isArrayIndex;
+const isValid = utilTypeFuncs.isValid;
+const isFunction = utilTypeFuncs.isFunction;
+const isString = utilTypeFuncs.isString;
+const isNumeric = utilTypeFuncs.isNumeric;
+const toNumber = utilTypeFuncs.toNumber;
+
+const BREAK = objEachBreak.BREAK;
+const cloneArrayObject = objEachBreak.cloneArrayObject;
+const hasOwnProperties = objEachBreak.hasOwnProperties;
+
 const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
 const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
 const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
+const createTransformedBoxed = testUtil.createTransformedBoxed;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createBoxedState;
-const isNullOrUndefined = boxedImmutable.util.isNullOrUndefined;
 const toTypeString = testUtil.toTypeString;
+const stringify = testUtil.stringify;
+const createBoxedState = testUtil.createBoxedState;
+const array = testUtil.array;
+const object = testUtil.object;
 
 describe('$_object tests', () => {
     let origVal;
@@ -23,7 +45,7 @@ describe('$_object tests', () => {
     let boxedProxy;
     let vals;
 
-    each([
+    jestEach([
         // ['undefined', undefined, {}],
         // ['null', null, {}],
         // ['""', "", {}],
@@ -66,7 +88,7 @@ test('boxOut().filteredProps() returns object with filtered properties', () => {
         normal: "normal",
     };
 
-    const boxedOut = util.boxOut(origVal);
+    const boxedOut = boxOut(origVal);
     const result = boxedOut.filteredProps((key, value) => key !== 'filteredOut' && key !== '1');
     expect(result).toEqual(expectedVal);
 
@@ -85,7 +107,7 @@ test('boxOut().filter() returns object with filtered properties', () => {
         "normal",
     ];
 
-    const boxedOut = util.boxOut(origVal);
+    const boxedOut = boxOut(origVal);
     const result = boxedOut.filter((key, value) => key !== 'filteredOut' && key !== '1');
     expect(result).toEqual(expectedVal);
 
@@ -106,8 +128,8 @@ test('boxOut().mappedProps() returns object with mapped properties', () => {
         filteredOut: "filteredOut",
     };
 
-    const boxedOut = util.boxOut(origVal);
-    const result = boxedOut.mappedProps((key, value) => util.isArrayIndex(key) && util.isNumeric(value) ? util.toNumber(value) + 2 : value);
+    const boxedOut = boxOut(origVal);
+    const result = boxedOut.mappedProps((key, value) => isArrayIndex(key) && isNumeric(value) ? toNumber(value) + 2 : value);
     expect(result).toEqual(expectedVal);
 });
 
@@ -129,7 +151,7 @@ test('boxOut().map() returns array with mapped property values', () => {
         "zzlast",
     ];
 
-    const boxedOut = util.boxOut(origVal);
-    const result = boxedOut.map((key, value) => util.isArrayIndex(key) && util.isNumeric(value) ? util.toNumber(value) + 2 : key !== 'filteredOut' ? value : undefined);
+    const boxedOut = boxOut(origVal);
+    const result = boxedOut.map((key, value) => isArrayIndex(key) && isNumeric(value) ? toNumber(value) + 2 : key !== 'filteredOut' ? value : undefined);
     expect(result).toEqual(expectedVal);
 });

@@ -2,11 +2,11 @@
 
 const boxed = require('./lib/boxed-immutable');
 const boxedState = require('./lib/boxed-state');
-const util = require('./lib/util');
+const boxOut = require('boxed-out');
 
 boxed.BoxedState = boxedState.BoxedState;
 boxed.boxState = boxedState.boxState;
-boxed.boxOut = util.boxOut;
+boxed.boxOut = boxOut;
 
 module.exports = {
     default: boxed.box,
@@ -18,6 +18,5 @@ module.exports = {
     boxOut: boxed.boxOut,
 
     // mostly for testing
-    util: util,
     boxed: boxed,
 };

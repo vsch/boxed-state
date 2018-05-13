@@ -2,12 +2,15 @@
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-:warning: Version 0.5.0 has renamed functions in the `util` internal library in the process of
-reducing conflict and to make them more consistent with their actual function. The API is
-evolving and will still change as its idiosyncrasies and limitations are discovered in use. The
-**boxed-in** proxy is fairly stable but may add new magic properties and eventually retire
-unused or little use properties. **boxed-out** proxy gained iteration helpers to mimic ones
-available for arrays.
+:warning: Version 0.7.0 factored out implementation into separate modules and removed exports
+for all except: `boxed-out` module implementing `boxOut` function. The rest need to be imported
+from their corresponding modules: `util-string-wrap`, `util-type-funcs`, `for-each-break` or
+`obj-each-break`.
+
+The API is evolving and will still change as its idiosyncrasies and limitations are discovered
+in use. The **boxed-in** proxy is fairly stable but may add new magic properties and eventually
+retire unused or little use properties. **boxed-out** proxy gained iteration helpers to mimic
+ones available for arrays.
 
 Immutable proxy wrapper with auto-vivification of intermediate objects/arrays with syntactic
 sugar to keep access/modification to deeply nested properties looking almost the same as plain

@@ -1,14 +1,43 @@
 "use strict";
-const each = require('jest-each');
-const boxedImmutable = require("boxed-immutable");
-const testUtil = require('./testUtil');
 
+const jestEach = require('jest-each');
+const boxedImmutable = require("boxed-immutable");
+const utilTypeFuncs = require('util-type-funcs');
+const objEachBreak = require('obj-each-break');
+const testUtil = require('./testUtil');
 const _$ = boxedImmutable._$;
-const isProxy = boxedImmutable.boxed.isBoxedProxy;
+const boxOut = boxedImmutable.boxOut;
+const $_ = boxedImmutable.boxOut;
+const boxState = boxedImmutable.boxState;
+
+const isObjectLike = utilTypeFuncs.isObjectLike;
+const isNullOrUndefined = utilTypeFuncs.isNullOrUndefined;
+const isArray = utilTypeFuncs.isArray;
+const toArrayIndex = utilTypeFuncs.toArrayIndex;
+const isArrayIndex = utilTypeFuncs.isArrayIndex;
+const isValid = utilTypeFuncs.isValid;
+const isFunction = utilTypeFuncs.isFunction;
+const isString = utilTypeFuncs.isString;
+const isNumeric = utilTypeFuncs.isNumeric;
+const toNumber = utilTypeFuncs.toNumber;
+
+const BREAK = objEachBreak.BREAK;
+const cloneArrayObject = objEachBreak.cloneArrayObject;
+const hasOwnProperties = objEachBreak.hasOwnProperties;
+
+const isBoxedProxy = boxedImmutable.boxed.isBoxedProxy;
+const isBoxedInProxy = boxedImmutable.boxed.isBoxedInProxy;
+const isBoxedOutProxy = boxedImmutable.boxed.isBoxedOutProxy;
+const createTransformedBoxed = testUtil.createTransformedBoxed;
 const generateTestParams = testUtil.generateTestParams;
 const paramStringException = testUtil.paramStringException;
 const createBoxed = testUtil.createBoxed;
 const createOnDemandBoxed = testUtil.createBoxedState;
+const toTypeString = testUtil.toTypeString;
+const stringify = testUtil.stringify;
+const createBoxedState = testUtil.createBoxedState;
+const array = testUtil.array;
+const object = testUtil.object;
 
 // TEST: complete this test
 // call: .$_default(value)
@@ -25,7 +54,7 @@ describe.skip('.$_default = value', () => {
 
     const params = generateTestParams(template, (t) => `_$(${t.valueText})`);
 
-    each(params)
+    jestEach(params)
         .describe('%s', (testDescription, thisTest) => {
             let origVal;
             let boxedVal;
@@ -69,7 +98,7 @@ describe.skip('.$_default = value', () => {
                     return `${t.valueText} param`;
                 });
 
-                each(nestedParams)
+                jestEach(nestedParams)
                     .describe(`%s`, (nestedDescription, nestedTest) => {
                         test(`${nestedTest.genTitle(' is ' + (JSON.stringify(paramStringException(thisTest.value, nestedTest.value)) || 'undefined'))}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value];
@@ -79,7 +108,7 @@ describe.skip('.$_default = value', () => {
 
                         test(`${nestedTest.genTitle(' isProxy', '"_$"')}`, () => {
                             let proxyElement = vals.boxedProxy[nestedTest.value + "_$"];
-                            expect(isProxy(proxyElement)).toBe(true);
+                            expect(isBoxedProxy(proxyElement)).toBe(true);
                         });
 
                         test(`${nestedTest.genTitle(' is not parent', '"_$"')}`, () => {
@@ -170,7 +199,7 @@ const defaults = {
     oldArr: [0, 10, 20],
 };
 
-each([
+jestEach([
     ['deep', 'deep'],
     ['merge', 'merge'],
     ['1000', '1000'],
@@ -187,7 +216,7 @@ each([
         });
     });
 
-each([
+jestEach([
     ['shallow', 'shallow'],
     ['1', '1'],
     ['{levels:"shallow"}', { levels: "shallow" }],
@@ -202,7 +231,7 @@ each([
         });
     });
 
-each([
+jestEach([
     ['2', '2'],
     ['{levels:"2"}', { levels: "2" }],
 ])
