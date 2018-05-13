@@ -14,6 +14,7 @@ module.exports = {
     "$_": boxed.boxOut,
     box: boxed.box,
     createBox: boxed.createBox,
+    defaultCanBox: boxed.defaultCanBox,
     boxState: boxed.boxState,
     boxOut: boxed.boxOut,
 

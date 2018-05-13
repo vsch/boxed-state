@@ -2,6 +2,7 @@
 
 [TOC]: # " "
 
+- [0.7.2](#072)
 - [0.7.0](#070)
 - [0.6.0](#060)
 - [0.5.8](#058)
@@ -27,6 +28,25 @@
 - [0.1.1](#011)
 - [0.1.0](#010)
 
+
+## 0.7.2
+
+* Change: by default only box values which are either non-object like or are pure `Array` or
+  `Object`. This will store all others by reference. If the properties of particular class are
+  desired to be persisted then define a custom box with your `canBox` function to test which
+  values should be boxed.
+
+  ```javascript
+      const boxedImmutable = require('boxed-immutable');
+      const createBox = boxedImmutable.createBox;
+      const defaultCanBox = boxedImmutable.defaultCanBox;
+      
+      const _$ = createBox({
+        canBox(value, prop, collection) {
+            return value instanceof YourType || defaultCanBox(value);
+        }
+    });
+  ```
 
 ## 0.7.0
 

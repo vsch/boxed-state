@@ -45,11 +45,13 @@ class UnBoxable {
     }
 }
 
-const customBox = boxedImmutable.createBox({
-    canBox(value) {
-        return !(value instanceof UnBoxable);
-    }
-});
+// non-pure Array or Object are now not boxed by default
+// const customBox = boxedImmutable.createBox({
+//     canBox(value) {
+//         return !(value instanceof UnBoxable);
+//     }
+// });
+const customBox = boxedImmutable.box;
 
 describe("unboxable", () => {
     let boxedValue_$;
