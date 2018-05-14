@@ -6,7 +6,7 @@ const utilTypeFuncs = require('util-type-funcs');
 const objEachBreak = require('obj-each-break');
 const testUtil = require('./testUtil');
 const boxOut = require('boxed-out');
-const boxState = require('../index');
+const boxState = require('boxed-state').boxState;
 
 const box = boxedImmutable.box;
 const _$ = box;
@@ -159,7 +159,7 @@ describe('boxed on demand changes', () => {
         let vals = createBoxedState(() => {
             getCalled++;
             return onDemand || origVal;
-        }, (modified, boxed) => {
+        }, (modified, boxed, callback) => {
             saveCalled++;
             onDemand = {
                 state: modified,

@@ -8,6 +8,9 @@ const isFunction = utilTypeFuncs.isFunction;
 const isObjectLike = utilTypeFuncs.isObjectLike;
 const firstDefined = utilTypeFuncs.firstDefined;
 const deleteItems = objEachBreak.deleteItems;
+
+const getBoxOnlyOptions = boxedImmutable.getBoxOnlyOptions;
+
 const UNDEFINED = void 0;
 
 function isValidBox(box) {
@@ -16,23 +19,30 @@ function isValidBox(box) {
 
 function getBoxed() {
     if (!this.boxed) {
-        this.boxed = this.box.withBoxOptions(this.getBoxOnlyOptions, this.getState());
+        this.boxed = this.box.withBoxOptions(this.boxOnlyOptions, this.getState());
     }
     return this.boxed;
 }
 
-function saveBoxed() {
+/**
+ * save modified state
+ * @param onDoneCallback    function to call on save complete
+ * @return {*}
+ */
+function saveBoxed(onDoneCallback = UNDEFINED) {
     const boxed = this.boxed;
     if (boxed) {
         const modified = boxed[boxedImmutable.BOXED_GET_THIS].valueOfModified();
         if (modified !== UNDEFINED) {
             this.boxed = UNDEFINED;
             if (this.saveState) {
-                return this.saveState(modified, boxed);
+                return this.saveState(modified, boxed, onDoneCallback);
             } else {
                 throw new TypeError("Save State Not Supported on this instance, saveState callback not provided");
             }
         }
+    } else if (onDoneCallback) {
+        onDoneCallback();
     }
 }
 
@@ -49,6 +59,7 @@ function cancelBoxed() {
 }
 
 function boxOptions(options) {
+    this.boxOnlyOptions = getBoxOnlyOptions(options);
     this.boxed = UNDEFINED;
     return this.proxiedThis;
 }
@@ -56,12 +67,16 @@ function boxOptions(options) {
 /**
  * create a new Boxed property or object
  * @param getState     get state callback which returns state to use for boxing
- * @param saveState    save state callback (boxed.$_modified$, boxed), value returned from this callback is returned to caller of .commit()
+ * @param saveState    save state callback saveState(boxed.$_modified$, boxed, onDoneCallback),
+ *                     value returned from this callback is returned to caller of .save(onDoneCallback)
  * @param options      box or options object
  *                     if options object:
  *                         box: box to use or global require('boxed-immutable').box
  *                         saveBoxedProp: property name to use for save, default 'save'
  *                         cancelBoxedProp:  property name to use for cancel, default 'cancel'
+ *
+ *                        + additional box only options for creating the box
+ *
  */
 function BoxedState(getState, saveState, options) {
     if (!isFunction(getState)) {
@@ -93,13 +108,14 @@ function BoxedState(getState, saveState, options) {
     this.boxOptionsProp = boxOptionsProp;
     this.getState = getState;
     this.saveState = saveState;
+    this.boxOnlyOptions = getBoxOnlyOptions(options);
     this.boxed = UNDEFINED;
     this.proxiedThis = UNDEFINED;
 
-    this.getBoxed = getBoxed.bind(this);
-    this.saveBoxed = saveBoxed.bind(this);
-    this.cancelBoxed = cancelBoxed.bind(this);
-    this.boxOptions = boxOptions.bind(this);
+    this.getBoxed = this.getBoxed.bind(this);
+    this.saveBoxed = this.saveBoxed.bind(this);
+    this.cancelBoxed = this.cancelBoxed.bind(this);
+    this.boxOptions = this.boxOptions.bind(this);
 }
 
 BoxedState.prototype.getBoxed = getBoxed;
@@ -187,8 +203,9 @@ const BoxedStateHandler = {
  * .$_cancel$() - cancels mods, clears boxed so next demand will create a new boxed
  *
  * @param getState   callback returning state to box
- * @param saveState  callback taking (modified, boxed) of the state on .$_save$()
- * @param options function for creating box or object containing {box: boxFunction} if not defined then global boxed-immutable.box will be used.
+ * @param saveState  callback taking (modified, boxed, onDoneCallback) of the state on .save(onDoneCallback)
+ * @param options function for creating box or object containing {box: boxFunction}
+ *                if not defined then global boxed-immutable.box will be used.
  * @return proxy which reflects fresh immutable state with commit/cancel on mods.
  */
 function boxState(getState, saveState, options) {

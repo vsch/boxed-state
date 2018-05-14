@@ -1,6 +1,6 @@
 describe(`README`, () => {
     test(`readme useage`, () => {
-        const boxState = require('boxed-state');
+        const boxState = require('boxed-state').boxState;
 
         // your function for returning the current immutable state object
         function getSimpleState() {
@@ -58,7 +58,7 @@ describe(`README`, () => {
 describe(`Wiki Transforms`, () => {
     test(`showDashboard true or false`, () => {
         const boxedImmutable = require('boxed-immutable');
-        const boxState = require('boxed-state');
+        const boxState = require('boxed-state').boxState;
 
         let dashBoardState = {
             showDashboard: false,
