@@ -198,8 +198,8 @@ function boxState(getState, saveState, options) {
 }
 
 // make it available for testing
-boxState.BoxedState = BoxedState;
+module.exports.BoxedState = BoxedState;
 
 // create customized context
-module.exports = boxState;
+module.exports.boxState = boxState;
 
