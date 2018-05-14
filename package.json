@@ -1,5 +1,5 @@
 {
-  "name": "boxed-immutable",
+  "name": "boxed-state",
   "version": "0.8.0",
   "private": false,
   "description": "Immutable proxy wrapper with exception free access to nested properties and auto-instantiation of intermediate containers when nested properties are defined",
@@ -32,10 +32,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/vsch/boxed-immutable.git"
+    "url": "git://github.com/vsch/boxed-state.git"
   },
-  "homepage": "https://github.com/vsch/boxed-immutable",
+  "homepage": "https://github.com/vsch/boxed-state",
   "bugs": {
-    "url": "https://github.com/vsch/boxed-immutable/issues"
+    "url": "https://github.com/vsch/boxed-state/issues"
   }
 }
