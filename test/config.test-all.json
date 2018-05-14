@@ -1,5 +1,0 @@
-{
-  "testRegex": ".*\\.test\\.js$",
-  "testRegex": "util\\..*\\.test\\.js$",
-  "testEnvironment": "node"
-}

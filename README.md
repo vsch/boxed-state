@@ -1,130 +1,119 @@
-# boxed-immutable
+# boxed-state
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-:warning: Version 0.7.0 factored out implementation into separate modules and removed exports
-for all except: `boxed-out` module implementing `boxOut` function. The rest need to be imported
-from their corresponding modules: `util-string-wrap`, `util-type-funcs`, `for-each-break` or
-`obj-each-break`.
+Implements a wrapper for immutable state with encapsulation of `save()` and `cancel()`
+implementations allowing making implementation independent use of transactional changes to the
+encapsulated state.
 
-The API is evolving and will still change as its idiosyncrasies and limitations are discovered
-in use. The **boxed-in** proxy is fairly stable but may add new magic properties and eventually
-retire unused or little use properties. **boxed-out** proxy gained iteration helpers to mimic
-ones available for arrays.
-
-Immutable proxy wrapper with auto-vivification of intermediate objects/arrays with syntactic
-sugar to keep access/modification to deeply nested properties looking almost the same as plain
-object property access. Flexible data transforms to massage or validate the data on boxed state
-creation or on property changes: [Transforms](../../wiki/Transforms)
-
-1. Create a boxed-immutable object proxy from any value, including `undefined` then access
-   and/or modify its direct and nested properties, without concern to whether intermediate
-   values are objects/arrays or whether they exist. The final result will either reflect the
-   value of an actual property or be undefined if any intermediate properties were undefined or
-   invalid.
-
-2. Modify any direct or nested properties without affecting the original object/array. It will
-   be shallow copied on first modification of any property. All further modifications will be
-   done on the copy.
-
-3. Get the full modified array/object or just the changed properties to pass to state updater
-   such as [Redux] `dispatch()` or [React] component's `setState()`.
+Immutability is provided by the [`boxed-immutable` module](https://github.com/vsch/boxed-immutable/blob/master/README.md)
 
 ## Install
 
 Use [npm](https://npmjs.com/) to install.
 
 ```sh
-npm install boxed-immutable --save
+npm install boxed-state --save
 ```
 
 ## Usage
 
-[![NPM](https://nodei.co/npm/boxed-immutable.png)](https://www.npmjs.com/package/boxed-immutable)
+[![NPM](https://nodei.co/npm/boxed-state.png)](https://www.npmjs.com/package/boxed-state)
 
-The concept behind this module is to create a protective box around a value: to box it.
+### `require('boxed-state')` function
 
-For values inside the box, all properties return a proxy that does the job of keeping immutable
-originals intact, track modified properties, auto-vivify containers when properties are set and
-provide magic properties.
+Provides a boxed proxy to immutable state, with `.save()` and `.cancel()` methods for saving or
+canceling state changes. With minimal code this allows transparent access to current state
+without the callers worrying about stale data or how to apply the changes back to the state
+holder.
 
-Any value can be boxed, traversed several levels deep into its property tree and at any point
-take that property value out of the box. All access from this point on to the property and its
-nested properties is on regular JavaScript object properties. If any intermediate property
-access was invalid, the value of the unboxed property will be `undefined`.
-
-Some code to show how it all comes together. Each example will be a continuation of the code in
-the previous example, unless it starts with the `require('boxed-immutable')`
+Applying partial changes to component's state is as easy as setting a value in a `boxState`
+instance and invoking `.save()`
 
 ```javascript
-const _$ = require('boxed-immutable').box;
+const boxState = require('boxed-state');
 
-let state = {
-    isLoaded: false,
-    isLoading: false,
-    appSettings: {
-        title: "The Title",
-    }
-};
+// your function for returning the current immutable state object
+function getSimpleState() {
+}
 
-let state_$ = _$(state);
-let dashboardName = "overview";
-let showDashboard;
-let title;
+let state_$;
 
-showDashboard = state_$.appSettings.dashboards[dashboardName].showDashboard(); // result is undefined
-title = state_$.appSettings.title(); // result is "The Title"
+// your current function for setting a new state 
+function saveState(newState) {
+    // 1. update state
+    // 2. regardless of how this function is called, cancel 
+    //    the cached boxed state, then next access will be forced to 
+    //    get a fresh state
+    state_$.cancel();
+}
+
+// wrap in proxy so boxed state can be provided automatically
+// use in new getState to get boxed state using default createBox options
+state_$ = boxState(() => {
+    return getSimpleState();
+}, (modified, boxed) => {
+    // call the save state function to apply changes in full
+    saveState(modified);
+
+    // or if your saveState can handle delta
+    //saveState(boxed.$_delta$);
+    // or anything else without having to change the users of your state API
+});
+
+// use new function to provide access to now boxed immutable state
+function getState() {
+    return state_$;
+}
+
+function handleEvent() {
+    // somewhere in the code.
+    let state_$ = getState();
+
+    // can use state as before or as boxed state, except now there is no need to get a new state 
+    // every time. The same state will reflect latest changes. Make a copy if you need immutable state
+
+    // NOTE: properties returned by state_$ are mutable, make a copy of state_$.$_value 
+    // or use the old getSimpleState() function if you need an immutable copy between state change  
+    
+    // make changes to state_$ properties
+
+    // saving is handled by the provider instead of having the caller know how to update state
+    state_$.save(); // save changes
+    // state_$.cancel(); // or to discard changes
+    // next access to any property of the boxed state will get a fresh copy of the state
+}
 ```
 
-Modifying properties is even easier because they can be set without unboxing. It might seem
-easier just to bang away on the unboxed state object but then you will not get immutability
-barrier, same value optimization, `TypeError` and `ReferenceError` protection and parent
-container instantiation. The following is a no-op:
+| Property | Get      | Set   | Delete | Call                                                                                                                                |
+|:---------|:---------|:------|:-------|:------------------------------------------------------------------------------------------------------------------------------------|
+| `save`   | function | error | error  | calls the saveState callback passed to `boxState` function, callback only called if there were changes made to boxed object         |
+| `cancel` | function | error | error  | cancels any changes, next access will get new current state, returns `undefined` or delta which can be used to re-apply the changes |
+
+#### boxState(getState, saveState, options)
 
 ```javascript
-state_$.isLoaded = false;
+const boxState = require('boxed-state').boxState;
+const boxedState = boxState();
 ```
 
-On the other hand the next line will cause the proxy to make a shallow copy of the boxed value
-and then set its `isLoading` property to `true`.
+Used to construct a new boxed state proxy.
 
-```javascript
-state_$.isLoading = true; // this will shallow copy the underlying object and set its property
-```
+| argument    | default | Description                                                                                                                              |
+|:------------|:--------|:-----------------------------------------------------------------------------------------------------------------------------------------|
+| `getState`  | none    | callback to obtain the current state                                                                                                     |
+| `saveState` | none    | callback to save modified, arguments: (newState, boxedState), return value passed back to caller of `save()`.                            |
+| `options`   | box     | options to use. Can be a box as provided by boxedImmutable.box or boxedImmutable.createBox(), then all other options are set to defaults |
 
-Now for some fun examples that would not work with JavaScript objects:
+`options`:
 
-```javascript
-state_$.appSettings.dashboards[dashboardName].showDashboard = true;
-state_$.appSettings.dashboards[dashboardName].dashboardTitle = "Overview";
-
-let newState = state_$;
-```
-
-At this point `newState` will be the same as if you did:
-
-```javascript
-let newState = {
-    isLoaded: false,
-    isLoading: true,
-    appSettings: {
-        title: "The Title",
-        dashboards: {
-            overview: {
-                showDashboard: true,
-                dashboardTitle: "Overview",
-            },
-        },
-    },
-};
-```
-
-The rest of this file was moved to the wiki for greater leg room, [boxed-immutable wiki](../../wiki)
-
-## License
-
-MIT, see [LICENSE.md](http://github.com/vsch/boxed-immutable/blob/master/LICENSE.md) for
-details.
+| Option             | Default      | Description                                                                                                                                      |
+|:-------------------|:-------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `box`:             | global `box` | Which box creation to use for each new boxed state object                                                                                        |
+| `saveBoxedProp`:   | `'save'`     | name of the `save` property to use, allows changing of the function to 'commit' or something that will not conflict with your state's properties |
+| `cancelBoxedProp`: | `'cancel'`   | name of the `cancel` property to use, allows changing of the function to something that will not conflict with your state's properties           |
+| `getTransforms`    | `undefined`  | get-transforms to use when creating a boxed state                                                                                                |
+| `setTransforms`    | `undefined`  | set-transforms to use when creating a boxed state                                                                                                |
 
 [React]: https://reactjs.org
 [Redux]: https://redux.js.org
