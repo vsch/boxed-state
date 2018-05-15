@@ -1,5 +1,5 @@
 describe(`README`, () => {
-    test(`readme useage`, () => {
+    test(`readme usage`, () => {
         const boxState = require('boxed-state').boxState;
 
         // your function for returning the current immutable state object
