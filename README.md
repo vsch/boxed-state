@@ -1,6 +1,6 @@
 # boxed-state
 
-[![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
+[![experimental](https://badges.github.io/stability-badges/dist/experimental.svg)](https://github.com/badges/stability-badges)
 
 Implements a wrapper for immutable state with encapsulation of `save()` and `cancel()`
 implementations allowing making implementation independent use of transactional changes to the
@@ -39,11 +39,11 @@ function getSimpleState() {
 
 let state_$;
 
-// your current function for setting a new state 
+// your current function for setting a new state
 function saveState(newState) {
     // 1. update state
-    // 2. regardless of how this function is called, cancel 
-    //    the cached boxed state, then next access will be forced to 
+    // 2. regardless of how this function is called, cancel
+    //    the cached boxed state, then next access will be forced to
     //    get a fresh state
     state_$.cancel();
 }
@@ -70,12 +70,12 @@ function handleEvent() {
     // somewhere in the code.
     let state_$ = getState();
 
-    // can use state as before or as boxed state, except now there is no need to get a new state 
+    // can use state as before or as boxed state, except now there is no need to get a new state
     // every time. The same state will reflect latest changes. Make a copy if you need immutable state
 
-    // NOTE: properties returned by state_$ are mutable, make a copy of state_$.$_value 
-    // or use the old getSimpleState() function if you need an immutable copy between state change  
-    
+    // NOTE: properties returned by state_$ are mutable, make a copy of state_$.$_value
+    // or use the old getSimpleState() function if you need an immutable copy between state change
+
     // make changes to state_$ properties
 
     // saving is handled by the provider instead of having the caller know how to update state
