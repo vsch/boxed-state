@@ -18,7 +18,7 @@
     "util-type-funcs": "^0.2.4",
     "for-each-break": "^0.2.0",
     "obj-each-break": "^0.1.8",
-    "boxed-out": "^0.1.2",
+    "boxed-out": "^0.1.4",
     "boxed-immutable": "^0.8.2"
   },
   "devDependencies": {
