@@ -1,6 +1,6 @@
 {
   "name": "boxed-state",
-  "version": "0.8.6",
+  "version": "0.8.8",
   "private": false,
   "description": "Immutable proxy wrapper with exception free access to nested properties and auto-instantiation of intermediate containers when nested properties are defined",
   "main": "index.js",
@@ -14,15 +14,16 @@
   "dependencies": {
     "lodash.isfunction": "^3.0.9",
     "lodash.isstring": "^4.0.1",
-    "util-string-wrap": "^0.1.0",
-    "util-type-funcs": "^0.2.4",
-    "for-each-break": "^0.2.0",
-    "obj-each-break": "^0.1.8",
+    "util-string-wrap": "^0.1.2",
+    "util-type-funcs": "^0.2.8",
+    "for-each-break": "^0.2.2",
+    "obj-each-break": "^0.1.10",
     "boxed-out": "^0.1.4",
-    "boxed-immutable": "^0.8.2"
+    "boxed-immutable": "^0.8.4"
   },
   "devDependencies": {
-    "jest-each": "^0.5.0"
+    "jest": "^24.1.0",
+    "jest-each": "^24.0.0"
   },
   "scripts": {},
   "keywords": [
