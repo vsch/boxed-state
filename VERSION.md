@@ -17,6 +17,8 @@
 * Fix: update `util-type-funcs`
 * Fix: update `for-each-break`
 * Fix: update `obj-each-break`
+* Fix: update `boxed-out`
+* Fix: update `boxed-immutable`
 
 ## 0.8.8
 
