@@ -2,12 +2,21 @@
 
 [TOC]: # " "
 
+- [0.8.10](#0810)
 - [0.8.8](#088)
 - [0.8.6](#086)
 - [0.8.4](#084)
 - [0.8.2](#082)
 - [0.8.0](#080)
 
+
+## 0.8.10
+
+* Fix: update jest version
+* Fix: update `util-string-wrap`
+* Fix: update `util-type-funcs`
+* Fix: update `for-each-break`
+* Fix: update `obj-each-break`
 
 ## 0.8.8
 
